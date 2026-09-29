@@ -33,6 +33,22 @@ python3 -m http.server 8000
 
 ## What's inside
 
+- **Personalized onboarding.** First visit asks your name (for a time-of-day
+  "Good morning/afternoon/evening" greeting) and which part of the real OA
+  you want to focus on — Situational Judgment, Coding, Behavioral/Power Day,
+  or Balanced. Revisit it anytime via the **Edit** button next to your
+  greeting. Saved to `localStorage` under `tdpPracticeProfile`.
+- **Optional skill check.** From onboarding, "Save & Take a Quick Skill
+  Check" runs a short diagnostic (4 fresh situational scenarios + 1 quick
+  easy coding problem, reusing the real rounds' own screens) and suggests a
+  focus area based on how you do — you can accept the suggestion or keep
+  your own pick. Skippable any time by just hitting Save & Continue instead.
+- **Focus-weighted bonus practice.** Pick Situational Judgment or Coding as
+  your focus, and the OA Results screen offers a one-time "Bonus Drill" of a
+  few more not-yet-seen items from that pool, paid at the same OA Bucks rate
+  as the main round. Pick Behavioral, and Power Day behavioral practice
+  rerolls a fresh 10-question draw every time you visit it instead of
+  repeating the same set.
 - **A 60-question practice bank.** 20 situational-judgment scenarios, 20
   behavioral questions (12 STAR + 8 motivation), and 20 coding problems (5
   variants across each of the 4 difficulty slots) — enough variety that
@@ -70,17 +86,19 @@ python3 -m http.server 8000
   get fully right (Most *and* Least correct, up to $24), $4–$8 for every
   coding problem you fully solve depending on difficulty (up to $24), an up
   to $8 speed bonus for finishing coding with time to spare, and $4 for
-  completing a Power Day behavioral practice. Spend the balance on 16 cute
-  emoji "companions" in the Reward Shop, from a $8 coffee up to a $60 "TDP
-  Offer Trophy." Balance and collection persist in `localStorage`, so they
-  carry over between practice runs in the same browser — nothing here
-  affects your actual score.
+  completing a Power Day behavioral practice. Spend the balance in an
+  arcade-style Reward Shop — 16 retro-badged companions, no emoji, chunky
+  pixel-font "BUY" buttons — from an $8 coffee up to a $60 "TDP Offer
+  Trophy." Balance and collection persist in `localStorage`, so they carry
+  over between practice runs in the same browser — nothing here affects your
+  actual score.
 - **Goals.** Six achievement-style goals (first run, strong situational score,
   strong coding score, a Power Day behavioral practice, collecting 3 shop
   items, 3 full practice runs) that each pay a one-time OA Bucks bonus the
   moment you hit them. Progress persists in `localStorage`.
-- **Date & deadline banner.** Shows today's date and a live countdown to an
-  editable application deadline on the home screen.
+- **Date picker & countdown.** Enter your actual OA date on the home screen
+  (a plain `<input type="date">`, right in the date banner) and it shows a
+  live countdown to it; falls back to an editable default until you do.
 
 ## Why it's built this way (sources)
 
@@ -125,3 +143,7 @@ question categories) of the real process.
 - Add/edit reward-shop items in `data/shop.js`. Wallet balance and ownership
   are managed by `js/wallet.js` (`window.OAWallet`), stored under the
   `tdpPracticeWallet` `localStorage` key.
+- The name/focus/OA-date/skill-check profile is managed by `js/profile.js`
+  (`window.OAProfile`), stored under `tdpPracticeProfile`. The fallback OA
+  date shown before a user picks their own lives in `js/app.js`
+  (`DEADLINE_DATE`).

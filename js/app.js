@@ -4,9 +4,34 @@
 
 (function () {
   const CODING_SECONDS = 70 * 60;
-  // Edit this to your own application deadline, or remove the banner call
-  // below if you'd rather not show one.
+  // Fallback shown until the user enters their own date via the home-screen
+  // date picker (persisted to their profile from then on).
   const DEADLINE_DATE = "2026-10-02";
+
+  const SJ_DOLLARS_PER_SCENARIO = 3;
+  const SKILLCHECK_SJ_COUNT = 4;
+  const SKILLCHECK_CODING_SECONDS = 5 * 60;
+  const BONUS_SJ_COUNT = 4;
+  const BONUS_CODING_COUNT = 2;
+  const BONUS_CODING_SECONDS = 15 * 60;
+
+  const FOCUS_OPTIONS = [
+    { id: "situational", label: "Situational Judgment", desc: "Virtual Job Tryout — work-style & judgment scenarios." },
+    { id: "coding", label: "Coding", desc: "CodeSignal — bank/business-flavored coding problems." },
+    { id: "behavioral", label: "Behavioral / Power Day", desc: "The onsite loop — STAR-format interview practice." },
+    { id: "balanced", label: "Balanced", desc: "Even practice across all three." },
+  ];
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  function greetingWord() {
+    const h = new Date().getHours();
+    if (h < 12) return "Good morning";
+    if (h < 18) return "Good afternoon";
+    return "Good evening";
+  }
 
   function freshState() {
     window.buildSituationalSet();
@@ -36,6 +61,11 @@
         timerHandle: null,
         responses: [],
       },
+      skillCheckMode: null,
+      skillCheckBackup: null,
+      skillCheckSjPct: null,
+      bonusDrillMode: null,
+      bonusDrillBackup: null,
     };
   }
 
@@ -51,6 +81,7 @@
     behavioralReview: document.getElementById("screen-behavioral-review"),
     shop: document.getElementById("screen-shop"),
     goals: document.getElementById("screen-goals"),
+    skillcheckResults: document.getElementById("screen-skillcheck-results"),
   };
   const timerPill = document.getElementById("global-timer");
   const walletBadge = document.getElementById("wallet-badge");
@@ -71,17 +102,103 @@
   function renderDateBanner() {
     const el = document.getElementById("date-banner");
     if (!el) return;
+    el.classList.add("tip-box");
+    const profile = window.OAProfile.get();
+    const dateStr = profile.oaDate || DEADLINE_DATE;
     const now = new Date();
-    const deadline = new Date(DEADLINE_DATE + "T23:59:59");
+    const deadline = new Date(dateStr + "T23:59:59");
     const todayStr = now.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
     const daysLeft = Math.ceil((deadline - now) / 86400000);
     let deadlineText;
-    if (daysLeft > 1) deadlineText = `⏳ ${daysLeft} days left until the assessment deadline`;
-    else if (daysLeft === 1) deadlineText = `⏳ 1 day left — the deadline is tomorrow!`;
-    else if (daysLeft === 0) deadlineText = `⏳ The deadline is today!`;
-    else deadlineText = `The assessment deadline has passed.`;
-    el.innerHTML = `📅 Today is ${todayStr} · ${deadlineText}`;
+    if (daysLeft > 1) deadlineText = `⏳ ${daysLeft} days left until your OA`;
+    else if (daysLeft === 1) deadlineText = `⏳ 1 day left — it's tomorrow!`;
+    else if (daysLeft === 0) deadlineText = `⏳ It's today!`;
+    else deadlineText = `That date has passed — update it once you have a new one.`;
+    el.innerHTML = `
+      <div>📅 Today is ${todayStr} · ${deadlineText}</div>
+      <label class="date-edit">
+        When's your OA?
+        <input type="date" id="oa-date-input" value="${escapeHtml(dateStr)}">
+      </label>
+    `;
     el.classList.toggle("urgent", daysLeft <= 3 && daysLeft >= 0);
+    el.querySelector("#oa-date-input").addEventListener("change", (e) => {
+      window.OAProfile.update({ oaDate: e.target.value });
+      renderDateBanner();
+    });
+  }
+
+  function renderHomeIntro(editing) {
+    const el = document.getElementById("onboarding-card");
+    if (!el) return;
+    const profile = window.OAProfile.get();
+
+    if (profile.onboarded && !editing) {
+      const focusOpt = FOCUS_OPTIONS.find((f) => f.id === profile.focus) || FOCUS_OPTIONS[3];
+      el.innerHTML = `
+        <div class="card greeting-row">
+          <div>
+            <div class="greeting-text">${greetingWord()}${profile.name ? ", " + escapeHtml(profile.name) : ""}!</div>
+            <div class="greeting-sub">Focused on: <strong>${focusOpt.label}</strong>${
+        profile.skillCheck && profile.skillCheck.done
+          ? ` · Skill check: ${profile.skillCheck.sjPct}% SJ / ${profile.skillCheck.codingPct}% coding`
+          : ""
+      }</div>
+          </div>
+          <button class="btn secondary small" id="edit-profile-btn">Edit</button>
+        </div>
+      `;
+      el.querySelector("#edit-profile-btn").addEventListener("click", () => renderHomeIntro(true));
+      return;
+    }
+
+    el.innerHTML = `
+      <div class="card onboarding-box">
+        <h3 style="margin-top:0;">${profile.onboarded ? "Edit your practice settings" : "Let's set up your practice"}</h3>
+        <label class="field-label" for="profile-name-input">What should we call you?</label>
+        <input type="text" id="profile-name-input" class="text-input" maxlength="30" placeholder="Your name" value="${escapeHtml(profile.name)}">
+
+        <div class="field-label" style="margin-top:14px;">What do you want to focus on? (these match the real OA's own components)</div>
+        <div class="focus-options" id="focus-options">
+          ${FOCUS_OPTIONS.map(
+            (f) => `
+            <label class="focus-option">
+              <input type="radio" name="focus" value="${f.id}" ${profile.focus === f.id ? "checked" : ""}>
+              <span class="focus-label">${f.label}</span>
+              <span class="focus-desc">${f.desc}</span>
+            </label>
+          `
+          ).join("")}
+        </div>
+
+        <div class="actions-row" style="margin-top:16px; flex-wrap:wrap;">
+          <button class="btn" id="onboarding-save-btn">Save &amp; Continue</button>
+          <button class="btn secondary" id="onboarding-skillcheck-btn">Save &amp; Take a Quick Skill Check</button>
+        </div>
+        <p style="color:var(--text-dim); font-size:0.85rem; margin: 10px 0 0;">
+          The skill check is a short diagnostic (a few situational scenarios + one quick easy coding
+          problem) that suggests a focus area based on how you do. Optional — skip it any time by
+          just hitting Save &amp; Continue.
+        </p>
+      </div>
+    `;
+
+    function currentFocus() {
+      const checked = el.querySelector('input[name="focus"]:checked');
+      return checked ? checked.value : "balanced";
+    }
+
+    el.querySelector("#onboarding-save-btn").addEventListener("click", () => {
+      const name = el.querySelector("#profile-name-input").value.trim().slice(0, 30);
+      window.OAProfile.update({ name, focus: currentFocus(), onboarded: true });
+      renderHomeIntro(false);
+    });
+
+    el.querySelector("#onboarding-skillcheck-btn").addEventListener("click", () => {
+      const name = el.querySelector("#profile-name-input").value.trim().slice(0, 30);
+      window.OAProfile.update({ name, focus: currentFocus() });
+      startSkillCheck();
+    });
   }
 
   // Awards any goals that just became true and returns the total OA Bucks
@@ -154,6 +271,14 @@
     clearSituationalTimer();
     timerPill.classList.remove("stopwatch");
     timerPill.style.display = "none";
+    if (state.skillCheckMode === "situational") {
+      handleSkillCheckSituationalDone();
+      return;
+    }
+    if (state.bonusDrillMode === "situational") {
+      handleBonusSituationalDone();
+      return;
+    }
     startCoding();
   }
 
@@ -181,7 +306,308 @@
   function finishCoding() {
     clearCodingTimer();
     timerPill.style.display = "none";
+    if (state.skillCheckMode === "coding") {
+      handleSkillCheckCodingDone();
+      return;
+    }
+    if (state.bonusDrillMode === "coding") {
+      handleBonusCodingDone();
+      return;
+    }
     showResults();
+  }
+
+  // --- Optional skill check: a short diagnostic (a few situational
+  // scenarios + one quick easy coding problem) offered during onboarding.
+  // It temporarily swaps the shared window.SITUATIONAL / window.PROBLEMS
+  // arrays (the same in-place-mutation pattern buildSituationalSet /
+  // buildProblemSet already use) so it can reuse the real situational and
+  // coding screens/renderers unchanged, then restores them afterward.
+
+  function startSkillCheck() {
+    state.skillCheckMode = "situational";
+    state.skillCheckBackup = { situational: window.SITUATIONAL.slice(), problems: window.PROBLEMS.slice() };
+
+    const pool = window.SITUATIONAL_POOL.slice();
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    window.SITUATIONAL.length = 0;
+    window.SITUATIONAL.push(...pool.slice(0, SKILLCHECK_SJ_COUNT));
+
+    state.situational = { index: 0, answers: {}, elapsedSec: 0, timerHandle: null, rewardClaimed: true };
+    showScreen("situational");
+    clearSituationalTimer();
+    timerPill.style.display = "inline-block";
+    timerPill.classList.remove("low", "critical");
+    timerPill.classList.add("stopwatch");
+    timerPill.textContent = fmtClock(0);
+    state.situational.timerHandle = setInterval(() => {
+      state.situational.elapsedSec += 1;
+      timerPill.textContent = fmtClock(state.situational.elapsedSec);
+    }, 1000);
+
+    window.OASituational.render(state, screens.situational.querySelector(".situational-body"), finishSituational);
+  }
+
+  function handleSkillCheckSituationalDone() {
+    const sj = window.OASituational.score(state);
+    state.skillCheckSjPct = Math.round((sj.points / sj.total) * 100);
+
+    window.SITUATIONAL.length = 0;
+    window.SITUATIONAL.push(...state.skillCheckBackup.situational);
+
+    startSkillCheckCoding();
+  }
+
+  function startSkillCheckCoding() {
+    state.skillCheckMode = "coding";
+    const easySlot = window.PROBLEM_SLOTS[Math.floor(Math.random() * 2)]; // slots 0 and 1 are the two Easy slots
+    const chosen = easySlot[Math.floor(Math.random() * easySlot.length)];
+    window.PROBLEMS.length = 0;
+    window.PROBLEMS.push(chosen);
+
+    state.coding.code = {};
+    state.coding.results = {};
+    state.coding.scores = {};
+    state.coding.currentProblemId = chosen.id;
+    state.coding.timeLeftSec = SKILLCHECK_CODING_SECONDS;
+    clearCodingTimer();
+    showScreen("coding");
+    timerPill.style.display = "inline-block";
+    timerPill.classList.remove("stopwatch", "low", "critical");
+    timerPill.textContent = fmtClock(state.coding.timeLeftSec);
+    window.OACoding.renderAll(state, screens.coding.querySelector(".coding-body"));
+
+    state.coding.timerHandle = setInterval(() => {
+      state.coding.timeLeftSec -= 1;
+      timerPill.textContent = fmtClock(state.coding.timeLeftSec);
+      timerPill.classList.toggle("critical", state.coding.timeLeftSec <= 60);
+      if (state.coding.timeLeftSec <= 0) {
+        clearCodingTimer();
+        finishCoding();
+      }
+    }, 1000);
+  }
+
+  function handleSkillCheckCodingDone() {
+    const totalPts = window.OACoding.totalPoints();
+    const earnedPts = window.OACoding.scoreEarned(state);
+    const codingPct = totalPts > 0 ? Math.round((earnedPts / totalPts) * 100) : 0;
+    const sjPct = state.skillCheckSjPct;
+
+    window.PROBLEMS.length = 0;
+    window.PROBLEMS.push(...state.skillCheckBackup.problems);
+
+    let suggestedFocus = "balanced";
+    if (Math.abs(sjPct - codingPct) >= 15) {
+      suggestedFocus = sjPct < codingPct ? "situational" : "coding";
+    }
+
+    state.skillCheckMode = null;
+    state.skillCheckSjPct = null;
+    state.skillCheckBackup = null;
+    // Skill check reused the real situational/coding state fields
+    // temporarily — reset them to a clean slate for the actual OA run.
+    state.situational = { index: 0, answers: {}, elapsedSec: 0, timerHandle: null, rewardClaimed: false };
+    state.coding = {
+      currentProblemId: window.PROBLEMS[0].id,
+      code: {},
+      results: {},
+      scores: {},
+      timeLeftSec: CODING_SECONDS,
+      timerHandle: null,
+    };
+
+    window.OAProfile.update({ skillCheck: { done: true, sjPct, codingPct, suggestedFocus }, onboarded: true });
+    showSkillCheckResults(sjPct, codingPct, suggestedFocus);
+  }
+
+  function showSkillCheckResults(sjPct, codingPct, suggestedFocus) {
+    showScreen("skillcheckResults");
+    const profile = window.OAProfile.get();
+    const suggestedOpt = FOCUS_OPTIONS.find((f) => f.id === suggestedFocus);
+    const currentOpt = FOCUS_OPTIONS.find((f) => f.id === profile.focus) || FOCUS_OPTIONS[3];
+    const root = screens.skillcheckResults.querySelector(".skillcheck-results-body");
+    root.innerHTML = `
+      <div class="score-summary">
+        <div class="score-tile"><div class="num">${sjPct}%</div><div class="label">Situational judgment</div></div>
+        <div class="score-tile"><div class="num">${codingPct}%</div><div class="label">Coding (1 easy problem)</div></div>
+      </div>
+      <div class="card">
+        <p style="margin:0;">Based on this quick check, we'd suggest focusing on <strong>${suggestedOpt.label}</strong>.</p>
+        <p style="color:var(--text-dim); margin: 6px 0 0;">You currently have <strong>${currentOpt.label}</strong> selected. This is just a quick diagnostic on a handful of questions, not a full score — feel free to keep your own pick.</p>
+      </div>
+      <div class="center" style="margin-top:20px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+        ${suggestedFocus !== profile.focus ? `<button class="btn" id="use-suggested-btn">Use Suggested Focus (${suggestedOpt.label})</button>` : ""}
+        <button class="btn secondary" id="keep-focus-btn">Keep My Focus (${currentOpt.label})</button>
+      </div>
+    `;
+    const finish = (focus) => {
+      window.OAProfile.update({ focus });
+      showScreen("home");
+      renderHomeIntro(false);
+    };
+    if (suggestedFocus !== profile.focus) {
+      root.querySelector("#use-suggested-btn").addEventListener("click", () => finish(suggestedFocus));
+    }
+    root.querySelector("#keep-focus-btn").addEventListener("click", () => finish(profile.focus));
+  }
+
+  // --- Bonus Focus Drill: offered on the results screen when the user has
+  // picked a Situational Judgment or Coding focus, this serves a few extra
+  // not-yet-seen items from the pool as optional bonus reps, using the same
+  // swap-the-shared-array-then-restore trick as the skill check above.
+
+  function startBonusDrill(kind) {
+    if (kind === "situational") {
+      state.bonusDrillMode = "situational";
+      state.bonusDrillBackup = window.SITUATIONAL.slice();
+      const usedIds = new Set(state.bonusDrillBackup.map((s) => s.id));
+      let remaining = window.SITUATIONAL_POOL.filter((s) => !usedIds.has(s.id));
+      if (remaining.length === 0) remaining = window.SITUATIONAL_POOL.slice();
+      for (let i = remaining.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [remaining[i], remaining[j]] = [remaining[j], remaining[i]];
+      }
+      window.SITUATIONAL.length = 0;
+      window.SITUATIONAL.push(...remaining.slice(0, BONUS_SJ_COUNT));
+
+      state.situational = { index: 0, answers: {}, elapsedSec: 0, timerHandle: null, rewardClaimed: true };
+      showScreen("situational");
+      clearSituationalTimer();
+      timerPill.style.display = "inline-block";
+      timerPill.classList.remove("low", "critical");
+      timerPill.classList.add("stopwatch");
+      timerPill.textContent = fmtClock(0);
+      state.situational.timerHandle = setInterval(() => {
+        state.situational.elapsedSec += 1;
+        timerPill.textContent = fmtClock(state.situational.elapsedSec);
+      }, 1000);
+      window.OASituational.render(state, screens.situational.querySelector(".situational-body"), finishSituational);
+      return;
+    }
+
+    if (kind === "coding") {
+      state.bonusDrillMode = "coding";
+      state.bonusDrillBackup = window.PROBLEMS.slice();
+      const slotIdxs = [0, 1, 2, 3];
+      for (let i = slotIdxs.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [slotIdxs[i], slotIdxs[j]] = [slotIdxs[j], slotIdxs[i]];
+      }
+      const bonusProblems = slotIdxs.slice(0, BONUS_CODING_COUNT).map((slotIdx) => {
+        const slot = window.PROBLEM_SLOTS[slotIdx];
+        const currentId = state.bonusDrillBackup[slotIdx] ? state.bonusDrillBackup[slotIdx].id : null;
+        const alternatives = slot.filter((p) => p.id !== currentId);
+        const pool = alternatives.length ? alternatives : slot;
+        return pool[Math.floor(Math.random() * pool.length)];
+      });
+      window.PROBLEMS.length = 0;
+      window.PROBLEMS.push(...bonusProblems);
+
+      state.coding.currentProblemId = bonusProblems[0].id;
+      state.coding.timeLeftSec = BONUS_CODING_SECONDS;
+      clearCodingTimer();
+      showScreen("coding");
+      timerPill.style.display = "inline-block";
+      timerPill.classList.remove("stopwatch");
+      timerPill.textContent = fmtClock(state.coding.timeLeftSec);
+      window.OACoding.renderAll(state, screens.coding.querySelector(".coding-body"));
+
+      state.coding.timerHandle = setInterval(() => {
+        state.coding.timeLeftSec -= 1;
+        timerPill.textContent = fmtClock(state.coding.timeLeftSec);
+        timerPill.classList.toggle("low", state.coding.timeLeftSec <= 300);
+        timerPill.classList.toggle("critical", state.coding.timeLeftSec <= 60);
+        if (state.coding.timeLeftSec <= 0) {
+          clearCodingTimer();
+          finishCoding();
+        }
+      }, 1000);
+    }
+  }
+
+  function handleBonusSituationalDone() {
+    clearSituationalTimer();
+    timerPill.style.display = "none";
+    const sj = window.OASituational.score(state);
+    const sjSolvedCount = sj.detail.filter((d) => d.mostCorrect && d.leastCorrect).length;
+    const earned = sjSolvedCount * SJ_DOLLARS_PER_SCENARIO;
+    window.OAWallet.earn(earned);
+
+    window.SITUATIONAL.length = 0;
+    window.SITUATIONAL.push(...state.bonusDrillBackup);
+    state.bonusDrillMode = null;
+    state.bonusDrillBackup = null;
+    state.situational = { index: 0, answers: {}, elapsedSec: 0, timerHandle: null, rewardClaimed: true };
+
+    updateWalletBadge();
+    showScreen("results");
+    renderBonusDrillDone(earned, sjSolvedCount, BONUS_SJ_COUNT, "scenario(s) nailed");
+  }
+
+  function handleBonusCodingDone() {
+    clearCodingTimer();
+    timerPill.style.display = "none";
+    const solved = window.PROBLEMS.filter((p) => (state.coding.scores[p.id] || 0) === p.points);
+    const earned = solved.reduce((sum, p) => sum + (p.reward || 0), 0);
+    window.OAWallet.earn(earned);
+
+    window.PROBLEMS.length = 0;
+    window.PROBLEMS.push(...state.bonusDrillBackup);
+    state.bonusDrillMode = null;
+    state.bonusDrillBackup = null;
+    state.coding.currentProblemId = window.PROBLEMS[0].id;
+
+    updateWalletBadge();
+    showScreen("results");
+    renderBonusDrillDone(earned, solved.length, BONUS_CODING_COUNT, "problem(s) solved");
+  }
+
+  function renderBonusDrillDone(earned, solvedCount, outOf, label) {
+    const area = screens.results.querySelector("#bonus-drill-area");
+    if (!area) return;
+    area.innerHTML = `
+      <div class="card" id="bonus-drill-card">
+        <h3 style="margin-top:0;">Bonus Drill Complete</h3>
+        <p style="color:var(--text-dim); margin:0;">${solvedCount}/${outOf} ${label} → +$${earned}. New balance: $${window.OAWallet.getBalance()}</p>
+      </div>
+    `;
+    const { newly } = awardNewlyCompletedGoals();
+    if (newly.length) area.innerHTML += goalUnlockedHtml(newly);
+  }
+
+  function renderBonusDrillPrompt() {
+    const profile = window.OAProfile.get();
+    if (profile.focus === "situational") {
+      return `
+        <div class="card" id="bonus-drill-card">
+          <h3 style="margin-top:0;">Focused Practice: Situational Judgment</h3>
+          <p style="color:var(--text-dim);">Your focus is Situational Judgment — want ${BONUS_SJ_COUNT} more scenarios before you stop?</p>
+          <button class="btn secondary" id="bonus-drill-btn" data-kind="situational">Start Bonus Drill (+${BONUS_SJ_COUNT} scenarios)</button>
+        </div>
+      `;
+    }
+    if (profile.focus === "coding") {
+      return `
+        <div class="card" id="bonus-drill-card">
+          <h3 style="margin-top:0;">Focused Practice: Coding</h3>
+          <p style="color:var(--text-dim);">Your focus is Coding — want ${BONUS_CODING_COUNT} more problems before you stop?</p>
+          <button class="btn secondary" id="bonus-drill-btn" data-kind="coding">Start Bonus Drill (+${BONUS_CODING_COUNT} problems)</button>
+        </div>
+      `;
+    }
+    if (profile.focus === "behavioral") {
+      return `
+        <div class="card" id="bonus-drill-card">
+          <h3 style="margin-top:0;">Focused Practice: Behavioral / Power Day</h3>
+          <p style="color:var(--text-dim); margin:0;">Your focus is Behavioral — Power Day behavioral practice now serves a fresh set of questions every time you visit it, so drop in as often as you'd like.</p>
+        </div>
+      `;
+    }
+    return "";
   }
 
   function codingVerdictFor(pct) {
@@ -219,7 +645,6 @@
     // doesn't double-pay them.
     const isFirstCompletionThisSession = !state.situational.rewardClaimed;
     const sjSolvedCount = sj.detail.filter((d) => d.mostCorrect && d.leastCorrect).length;
-    const SJ_DOLLARS_PER_SCENARIO = 3;
     const sjDollarsThisTime = state.situational.rewardClaimed ? 0 : sjSolvedCount * SJ_DOLLARS_PER_SCENARIO;
     state.situational.rewardClaimed = true;
 
@@ -280,6 +705,8 @@
         ${goalUnlockedHtml(newlyGoals)}
       </div>
 
+      <div id="bonus-drill-area">${renderBonusDrillPrompt()}</div>
+
       <div class="center" style="margin-top:28px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
         <button class="btn" id="powerday-btn">What's Next: Power Day Prep →</button>
         <button class="btn secondary" id="shop-btn-results">Visit Reward Shop</button>
@@ -287,6 +714,11 @@
         <button class="btn secondary" id="restart-btn">Restart Practice OA</button>
       </div>
     `;
+
+    const bonusDrillBtn = root.querySelector("#bonus-drill-btn");
+    if (bonusDrillBtn) {
+      bonusDrillBtn.addEventListener("click", () => startBonusDrill(bonusDrillBtn.getAttribute("data-kind")));
+    }
 
     const sjRoot = root.querySelector("#sj-breakdown");
     sj.detail.forEach((d, i) => {
@@ -345,9 +777,19 @@
     shelf.innerHTML = owned
       .map((id) => {
         const item = window.SHOP_ITEMS.find((i) => i.id === id);
-        return item ? `<span title="${item.name}">${item.emoji}</span>` : "";
+        return item ? `<span class="arcade-chip" title="${item.name}">${arcadeInitials(item.name)}</span>` : "";
       })
       .join("");
+  }
+
+  function arcadeInitials(name) {
+    return name
+      .split(" ")
+      .filter(Boolean)
+      .map((w) => w[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase();
   }
 
   function renderShopGrid() {
@@ -358,13 +800,13 @@
       const canAfford = balance >= item.cost;
       return `
         <div class="shop-item ${owned ? "owned" : ""}">
-          <div class="emoji">${item.emoji}</div>
+          <div class="arcade-badge">${arcadeInitials(item.name)}</div>
           <div class="name">${item.name}</div>
           <div class="flavor">${item.flavor}</div>
           ${
             owned
-              ? `<div class="owned-tag">✓ Owned</div>`
-              : `<div class="cost">$${item.cost}</div><button class="btn small" data-buy="${item.id}" ${canAfford ? "" : "disabled"}>${canAfford ? "Buy" : "Need more $"}</button>`
+              ? `<div class="owned-tag">OWNED</div>`
+              : `<div class="cost">$${item.cost}</div><button class="btn small arcade-btn" data-buy="${item.id}" ${canAfford ? "" : "disabled"}>${canAfford ? "BUY" : "NEED $"}</button>`
           }
         </div>
       `;
@@ -507,6 +949,10 @@
   }
 
   function startBehavioralStandalone() {
+    // Reroll a fresh 10-question draw from the 20-question pool every visit,
+    // so Power Day behavioral practice (the natural "extra reps" venue for a
+    // Behavioral-focused profile) doesn't just repeat the same set each time.
+    window.buildBehavioralSet();
     state.behavioral.index = 0;
     state.behavioral.phase = "think";
     state.behavioral.timeLeftSec = window.OABehavioral.THINK_SECONDS;
@@ -569,5 +1015,6 @@
   updateWalletBadge();
   updateGoalsSummaryHome();
   renderDateBanner();
+  renderHomeIntro(false);
   showScreen("home");
 })();
