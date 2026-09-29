@@ -159,6 +159,102 @@ window.SITUATIONAL_POOL = [
       { id: "d", text: "Share full detail since it's an interesting technical problem worth discussing.", rank: 4 },
     ],
   },
+  {
+    id: "sj13",
+    competency: "Delegation",
+    scenario:
+      "You're the most experienced person on a small project team, and a junior teammate keeps sending you their work-in-progress for review well before it's ready, slowing you down on your own tasks.",
+    options: [
+      { id: "a", text: "Have a quick, kind conversation with them about when it's most useful to send you something, and offer a couple of checkpoints they can self-check against first.", rank: 1 },
+      { id: "b", text: "Keep reviewing everything they send right away so they don't feel ignored, even though it's costing you time.", rank: 3 },
+      { id: "c", text: "Start replying slower and vaguer to discourage them without saying anything directly.", rank: 4 },
+      { id: "d", text: "Tell your manager the teammate is slowing you down and ask for the reviews to be reassigned.", rank: 2 },
+    ],
+  },
+  {
+    id: "sj14",
+    competency: "Innovation & Process Improvement",
+    scenario:
+      "You notice your team manually repeats the same multi-step deployment checklist every release, and you think a script could automate most of it, but nobody asked you to build one.",
+    options: [
+      { id: "a", text: "Spend a small amount of your own slack time prototyping a script, then show the team and ask if it's worth adopting.", rank: 1 },
+      { id: "b", text: "Say nothing and keep doing the manual checklist like everyone else, since it's not officially your job.", rank: 3 },
+      { id: "c", text: "Quietly replace the checklist with your own script without telling anyone, to save time immediately.", rank: 4 },
+      { id: "d", text: "Mention the idea once in a retro and drop it if nobody responds right away.", rank: 2 },
+    ],
+  },
+  {
+    id: "sj15",
+    competency: "Handling Pressure",
+    scenario:
+      "It's the last hour before a release freeze, several small things are going wrong at once, and your manager keeps asking for status updates every few minutes.",
+    options: [
+      { id: "a", text: "Take a breath, quickly triage what actually blocks the release versus what can wait, and give your manager one clear, honest status update with a plan.", rank: 1 },
+      { id: "b", text: "Answer every single status ping in detail the instant it arrives, even if it means constantly context-switching away from fixing anything.", rank: 3 },
+      { id: "c", text: "Stop responding to your manager entirely until everything is fixed, to avoid the distraction.", rank: 4 },
+      { id: "d", text: "Tell your manager everything is fine without checking, to reduce the pressure in the moment.", rank: 2 },
+    ],
+  },
+  {
+    id: "sj16",
+    competency: "Vendor / External Communication",
+    scenario:
+      "A third-party vendor's API your team depends on is returning inconsistent data, and their support contact has been slow to respond for a few days.",
+    options: [
+      { id: "a", text: "Document the specific inconsistencies with examples, escalate through the proper vendor-management channel, and add a temporary safeguard on your side in the meantime.", rank: 1 },
+      { id: "b", text: "Keep emailing the same slow contact repeatedly and wait, without looping in anyone internally.", rank: 3 },
+      { id: "c", text: "Quietly work around it by hardcoding assumptions about their data without flagging the underlying issue to your team.", rank: 4 },
+      { id: "d", text: "Mention it to your manager once, then wait passively for the vendor to eventually respond.", rank: 2 },
+    ],
+  },
+  {
+    id: "sj17",
+    competency: "Inclusion & Respect",
+    scenario:
+      "In a group meeting, you notice one teammate's ideas keep getting talked over before they can finish explaining them.",
+    options: [
+      { id: "a", text: "Politely redirect the conversation — \"I don't think we heard the rest of that, go ahead\" — so they can finish their point.", rank: 1 },
+      { id: "b", text: "Say nothing during the meeting, but mention it to them privately afterward.", rank: 2 },
+      { id: "c", text: "Assume they'll speak up for themselves eventually and don't get involved.", rank: 3 },
+      { id: "d", text: "Bring it up publicly and pointedly call out whoever interrupted, mid-meeting.", rank: 4 },
+    ],
+  },
+  {
+    id: "sj18",
+    competency: "Resource Constraints",
+    scenario:
+      "You're asked to deliver a feature in half the time you'd normally estimate, with no additional headcount, and the request came from a director.",
+    options: [
+      { id: "a", text: "Propose a scoped-down version that fits the timeline, clearly stating what's cut and why, rather than silently agreeing to the full original scope.", rank: 1 },
+      { id: "b", text: "Agree to the original timeline and scope outright to avoid pushback, and hope it works out.", rank: 3 },
+      { id: "c", text: "Refuse the request outright without offering any alternative.", rank: 4 },
+      { id: "d", text: "Quietly plan to cut corners on testing to hit the date, without telling anyone.", rank: 2 },
+    ],
+  },
+  {
+    id: "sj19",
+    competency: "Regulatory / Compliance Awareness",
+    scenario:
+      "You're building a feature that stores a new field of customer data, and you're not sure whether it falls under a data-retention policy your company has for sensitive financial information.",
+    options: [
+      { id: "a", text: "Pause and check with your team lead or the compliance/privacy point of contact before storing the data, even if it adds a short delay.", rank: 1 },
+      { id: "b", text: "Assume it's probably fine since it's a small, seemingly low-risk field, and proceed without checking.", rank: 3 },
+      { id: "c", text: "Store it exactly like other similar fields already in the codebase, without checking whether those were reviewed either.", rank: 2 },
+      { id: "d", text: "Store the data and plan to remove it later if someone raises a concern.", rank: 4 },
+    ],
+  },
+  {
+    id: "sj20",
+    competency: "Remote / Async Collaboration",
+    scenario:
+      "You work with teammates in a very different time zone, and you just found a bug that isn't urgent but will need their input to fix, and they won't be online for another 8 hours.",
+    options: [
+      { id: "a", text: "Write up a clear, detailed async message now — what you found, why it matters, and what you need from them — so they can act on it as soon as they're online.", rank: 1 },
+      { id: "b", text: "Wait until they're online to explain it live, even though that delays things by many hours for no real reason.", rank: 3 },
+      { id: "c", text: "Try to fix it yourself without their input, even though it's outside your area of context.", rank: 4 },
+      { id: "d", text: "Send a one-line message like \"can we talk about that bug later\" with no other detail.", rank: 2 },
+    ],
+  },
 ];
 
 window.SITUATIONAL = window.SITUATIONAL_POOL.slice(0, 8);

@@ -12,6 +12,7 @@ window.PROBLEMS = [
     title: "Deposit & Withdrawal Ledger",
     difficulty: "Easy",
     points: 15,
+    reward: 4,
     entryName: "processLedger",
     prompt: `
       <p>You are given a list of transactions applied in order to an account
@@ -48,6 +49,7 @@ window.PROBLEMS = [
     title: "Statement Formatter",
     difficulty: "Easy",
     points: 20,
+    reward: 5,
     entryName: "formatAmount",
     prompt: `
       <p>Bank statements display amounts stored as integer <strong>cents</strong>
@@ -86,6 +88,7 @@ window.PROBLEMS = [
     title: "Simple Bank System",
     difficulty: "Medium",
     points: 30,
+    reward: 7,
     entryName: "BankSystem",
     prompt: `
       <p>Implement a class <code>BankSystem</code> that manages
@@ -175,6 +178,7 @@ return results;`,
     title: "Card Authorization State Machine",
     difficulty: "Hard",
     points: 35,
+    reward: 8,
     entryName: "runCardMachine",
     prompt: `
       <p>Model an ATM card-authorization flow as a state machine and write
@@ -282,6 +286,7 @@ const p1_alt = {
   title: "Round-Up Savings Tracker",
   difficulty: "Easy",
   points: 15,
+  reward: 4,
   entryName: "roundUpSavings",
   prompt: `
     <p>A "round-up savings" feature rounds every purchase up to the next
@@ -319,6 +324,7 @@ const p2_alt = {
   title: "Masked Account Number",
   difficulty: "Easy",
   points: 20,
+  reward: 5,
   entryName: "maskAccountNumber",
   prompt: `
     <p>Write <code>maskAccountNumber(number)</code>, where
@@ -353,6 +359,7 @@ const p3_alt = {
   title: "Multi-Currency Wallet",
   difficulty: "Medium",
   points: 30,
+  reward: 7,
   entryName: "Wallet",
   prompt: `
     <p>Implement a class <code>Wallet</code> that holds balances in multiple
@@ -437,6 +444,7 @@ const p4_alt = {
   title: "Loan Application State Machine",
   difficulty: "Hard",
   points: 35,
+  reward: 8,
   entryName: "runLoanMachine",
   prompt: `
     <p>Model a loan application as a state machine and write
@@ -497,11 +505,716 @@ const p4_alt = {
   ],
 };
 
+/* --- Second wave of variants (added to grow the practice bank to 60
+   total questions across situational/coding/behavioral). Same difficulty
+   tiers and point/reward values as their slot, so the round always totals
+   the same points and dollars no matter which variant gets picked. --- */
+
+const p1_alt2 = {
+  id: "p1-alt2",
+  title: "Daily Spending Limit Tracker",
+  difficulty: "Easy",
+  points: 15,
+  reward: 4,
+  entryName: "dailySpendingLimitTracker",
+  prompt: `
+    <p>Write <code>dailySpendingLimitTracker(transactions, dailyLimit)</code>.
+    <code>transactions</code> is an array of strings: either the literal
+    string <code>"day"</code> (marks the start of a new day and resets that
+    day's running total to 0) or a numeric string representing a purchase
+    amount made on the current day.</p>
+    <p>For each purchase, if adding it to the current day's running total
+    would exceed <code>dailyLimit</code>, the purchase is
+    <strong>declined</strong> (it does not count toward the day's total or
+    the overall spent total). Otherwise it's accepted and added to both.</p>
+    <p>Return <code>{ spent, declined }</code>: the total amount actually
+    spent across all days, and the total number of declined purchases.</p>
+    <p><strong>Example:</strong><br>
+    <code>dailySpendingLimitTracker(["50", "60", "day", "30", "90"], 100)</code>
+    → <code>{ spent: 80, declined: 2 }</code> (day 1: 50 accepted, 60
+    declined since 50+60&gt;100; day 2 resets: 30 accepted, 90 declined
+    since 30+90&gt;100)</p>
+  `,
+  starterCode:
+`function dailySpendingLimitTracker(transactions, dailyLimit) {
+  // transactions: string[] — "day" resets the running total, else a purchase amount
+  // return { spent: number, declined: number }
+
+}`,
+  callTemplate: "return dailySpendingLimitTracker(__INPUT__.transactions, __INPUT__.dailyLimit);",
+  tests: [
+    { input: { transactions: ["50", "60", "day", "30", "90"], dailyLimit: 100 }, expected: { spent: 80, declined: 2 }, hidden: false },
+    { input: { transactions: ["10", "10", "10"], dailyLimit: 100 }, expected: { spent: 30, declined: 0 }, hidden: false },
+    { input: { transactions: [], dailyLimit: 100 }, expected: { spent: 0, declined: 0 }, hidden: true },
+    { input: { transactions: ["day", "5"], dailyLimit: 0 }, expected: { spent: 0, declined: 1 }, hidden: true },
+  ],
+};
+
+const p1_alt3 = {
+  id: "p1-alt3",
+  title: "ATM Bill Dispenser",
+  difficulty: "Easy",
+  points: 15,
+  reward: 4,
+  entryName: "atmBillDispenser",
+  prompt: `
+    <p>An ATM stocks an unlimited supply of $100, $50, $20, and $10 bills.
+    Write <code>atmBillDispenser(amount)</code> that returns the bills to
+    dispense using as <strong>few bills as possible</strong> (largest
+    denominations first).</p>
+    <p>Return <code>{ bills, count }</code> where <code>bills</code> is the
+    array of bill values used (largest first) and <code>count</code> is
+    <code>bills.length</code>. If <code>amount</code> is negative or isn't a
+    multiple of 10 (so it can't be made exactly with these bills), return
+    <code>false</code>.</p>
+    <p><strong>Examples:</strong><br>
+    <code>atmBillDispenser(80)</code> → <code>{ bills: [50, 20, 10], count: 3 }</code><br>
+    <code>atmBillDispenser(25)</code> → <code>false</code></p>
+  `,
+  starterCode:
+`function atmBillDispenser(amount) {
+  // return { bills: number[], count: number } or false
+
+}`,
+  callTemplate: "return atmBillDispenser(__INPUT__);",
+  tests: [
+    { input: 80, expected: { bills: [50, 20, 10], count: 3 }, hidden: false },
+    { input: 30, expected: { bills: [20, 10], count: 2 }, hidden: false },
+    { input: 25, expected: false, hidden: true },
+    { input: 0, expected: { bills: [], count: 0 }, hidden: true },
+  ],
+};
+
+const p1_alt4 = {
+  id: "p1-alt4",
+  title: "Balance Threshold Alerts",
+  difficulty: "Easy",
+  points: 15,
+  reward: 4,
+  entryName: "balanceThresholdAlerts",
+  prompt: `
+    <p>Write <code>balanceThresholdAlerts(startBalance, transactions, lowBalanceThreshold)</code>.
+    <code>transactions</code> is an array of integers (positive = deposit,
+    negative = withdrawal) applied in order to a balance that starts at
+    <code>startBalance</code>. Unlike a ledger, transactions always go
+    through (the balance is allowed to go below the threshold, and even
+    negative) — but every time the balance ends up below
+    <code>lowBalanceThreshold</code> immediately after a transaction, that
+    counts as one alert.</p>
+    <p>Return <code>{ finalBalance, alertCount }</code>.</p>
+    <p><strong>Example:</strong><br>
+    <code>balanceThresholdAlerts(100, [-60, 20, -30], 50)</code> →
+    <code>{ finalBalance: 30, alertCount: 2 }</code> (100-60=40, below 50:
+    alert; 40+20=60, fine; 60-30=30, below 50: alert)</p>
+  `,
+  starterCode:
+`function balanceThresholdAlerts(startBalance, transactions, lowBalanceThreshold) {
+  // return { finalBalance: number, alertCount: number }
+
+}`,
+  callTemplate: "return balanceThresholdAlerts(__INPUT__.startBalance, __INPUT__.transactions, __INPUT__.lowBalanceThreshold);",
+  tests: [
+    { input: { startBalance: 100, transactions: [-60, 20, -30], lowBalanceThreshold: 50 }, expected: { finalBalance: 30, alertCount: 2 }, hidden: false },
+    { input: { startBalance: 100, transactions: [10, 10], lowBalanceThreshold: 50 }, expected: { finalBalance: 120, alertCount: 0 }, hidden: false },
+    { input: { startBalance: 50, transactions: [], lowBalanceThreshold: 10 }, expected: { finalBalance: 50, alertCount: 0 }, hidden: true },
+  ],
+};
+
+const p2_alt2 = {
+  id: "p2-alt2",
+  title: "Transaction Reference ID Generator",
+  difficulty: "Easy",
+  points: 20,
+  reward: 5,
+  entryName: "generateRefs",
+  prompt: `
+    <p>Write <code>generateRefs(transactions)</code>, where each item in
+    <code>transactions</code> is <code>{ type, seq }</code>
+    (<code>type</code> a short string like <code>"DEP"</code>, <code>seq</code>
+    a non-negative integer). Return an array of reference-id strings in the
+    form <code>"&lt;TYPE&gt;-&lt;seq padded to 6 digits with leading
+    zeros&gt;"</code>. If <code>seq</code> already has 6 or more digits,
+    don't truncate it — just use it as-is.</p>
+    <p><strong>Example:</strong><br>
+    <code>generateRefs([{type:"DEP",seq:42},{type:"WD",seq:7}])</code> →
+    <code>["DEP-000042", "WD-000007"]</code></p>
+  `,
+  starterCode:
+`function generateRefs(transactions) {
+  // transactions: { type: string, seq: number }[]
+  // return string[]
+
+}`,
+  callTemplate: "return generateRefs(__INPUT__);",
+  tests: [
+    { input: [{ type: "DEP", seq: 42 }, { type: "WD", seq: 7 }], expected: ["DEP-000042", "WD-000007"], hidden: false },
+    { input: [{ type: "XFER", seq: 1 }], expected: ["XFER-000001"], hidden: false },
+    { input: [], expected: [], hidden: true },
+    { input: [{ type: "XFER", seq: 1234567 }], expected: ["XFER-1234567"], hidden: true },
+  ],
+};
+
+const p2_alt3 = {
+  id: "p2-alt3",
+  title: "Field Namer (camelCase)",
+  difficulty: "Easy",
+  points: 20,
+  reward: 5,
+  entryName: "toFieldName",
+  prompt: `
+    <p>Internal form labels need matching camelCase field names. Write
+    <code>toFieldName(label)</code>, where <code>label</code> is one or more
+    lowercase words separated by single spaces. Lowercase the first word
+    as-is, capitalize the first letter of every following word (lowercasing
+    the rest of it), and join everything with no spaces.</p>
+    <p><strong>Examples:</strong><br>
+    <code>toFieldName("account holder name")</code> → <code>"accountHolderName"</code><br>
+    <code>toFieldName("apr")</code> → <code>"apr"</code></p>
+  `,
+  starterCode:
+`function toFieldName(label) {
+  // label: space-separated lowercase words
+  // return the camelCase field name
+
+}`,
+  callTemplate: "return toFieldName(__INPUT__);",
+  tests: [
+    { input: "account holder name", expected: "accountHolderName", hidden: false },
+    { input: "routing number", expected: "routingNumber", hidden: false },
+    { input: "apr", expected: "apr", hidden: true },
+    { input: "available credit limit", expected: "availableCreditLimit", hidden: true },
+  ],
+};
+
+const p2_alt4 = {
+  id: "p2-alt4",
+  title: "Statement Line Truncator",
+  difficulty: "Easy",
+  points: 20,
+  reward: 5,
+  entryName: "truncateLine",
+  prompt: `
+    <p>Write <code>truncateLine(text, maxLength)</code> for fitting a
+    merchant description into a fixed-width statement line.</p>
+    <ul>
+      <li>If <code>text.length &lt;= maxLength</code>, return it unchanged.</li>
+      <li>Otherwise, if <code>maxLength &gt; 3</code>, return the first
+      <code>maxLength - 3</code> characters followed by <code>"..."</code>
+      (so the result is exactly <code>maxLength</code> characters).</li>
+      <li>Otherwise (<code>maxLength &lt;= 3</code>, too short to fit an
+      ellipsis meaningfully), just return the first <code>maxLength</code>
+      characters with no ellipsis.</li>
+    </ul>
+    <p><strong>Examples:</strong><br>
+    <code>truncateLine("AMAZON MARKETPLACE PMTS", 10)</code> → <code>"AMAZON ..."</code><br>
+    <code>truncateLine("STARBUCKS", 20)</code> → <code>"STARBUCKS"</code></p>
+  `,
+  starterCode:
+`function truncateLine(text, maxLength) {
+  // return the truncated line described above
+
+}`,
+  callTemplate: "return truncateLine(__INPUT__.text, __INPUT__.maxLength);",
+  tests: [
+    { input: { text: "AMAZON MARKETPLACE PMTS", maxLength: 10 }, expected: "AMAZON ...", hidden: false },
+    { input: { text: "STARBUCKS", maxLength: 20 }, expected: "STARBUCKS", hidden: false },
+    { input: { text: "SUPERLONGMERCHANTNAME", maxLength: 5 }, expected: "SU...", hidden: true },
+    { input: { text: "HELLO", maxLength: 3 }, expected: "HEL", hidden: true },
+  ],
+};
+
+const p3_alt2 = {
+  id: "p3-alt2",
+  title: "Joint Account Manager",
+  difficulty: "Medium",
+  points: 30,
+  reward: 7,
+  entryName: "JointAccount",
+  prompt: `
+    <p>Implement a class <code>JointAccount</code> that tracks which owners
+    are currently authorized on a shared account.</p>
+    <pre>class JointAccount {
+  constructor(owners, balance)   // owners: string[] of unique starting owner names
+  authorize(owner)   // adds owner if not already authorized; returns true if
+                      // added, false if already authorized
+  revoke(owner)       // removes owner; returns true if removed, false if not
+                       // currently authorized, or if they're the only
+                       // remaining owner (can't remove the last owner)
+  deposit(owner, amount)    // returns new balance, or false if owner isn't
+                             // authorized or amount &lt;= 0
+  withdraw(owner, amount)   // returns new balance, or false if owner isn't
+                             // authorized, amount &lt;= 0, or insufficient funds
+}</pre>
+      <p>A failed operation must not change the balance or the authorized set.</p>
+  `,
+  starterCode:
+`class JointAccount {
+  constructor(owners, balance) {
+
+  }
+  authorize(owner) {
+
+  }
+  revoke(owner) {
+
+  }
+  deposit(owner, amount) {
+
+  }
+  withdraw(owner, amount) {
+
+  }
+}`,
+  callTemplate:
+`const __input = __INPUT__;
+const acc = new JointAccount(__input.owners, __input.balance);
+const results = [];
+for (const op of __input.ops) {
+  if (op.type === 'deposit') results.push(acc.deposit(op.owner, op.amount));
+  else if (op.type === 'withdraw') results.push(acc.withdraw(op.owner, op.amount));
+  else if (op.type === 'authorize') results.push(acc.authorize(op.owner));
+  else if (op.type === 'revoke') results.push(acc.revoke(op.owner));
+}
+return results;`,
+  tests: [
+    {
+      input: {
+        owners: ["A", "B"],
+        balance: 100,
+        ops: [
+          { type: "deposit", owner: "A", amount: 50 },
+          { type: "withdraw", owner: "B", amount: 30 },
+          { type: "authorize", owner: "C" },
+          { type: "withdraw", owner: "C", amount: 20 },
+          { type: "revoke", owner: "A" },
+        ],
+      },
+      expected: [150, 120, true, 100, true],
+      hidden: false,
+    },
+    {
+      input: {
+        owners: ["B", "C"],
+        balance: 100,
+        ops: [
+          { type: "withdraw", owner: "A", amount: 10 },
+          { type: "revoke", owner: "B" },
+          { type: "revoke", owner: "C" },
+        ],
+      },
+      expected: [false, true, false],
+      hidden: false,
+    },
+    {
+      input: {
+        owners: ["A"],
+        balance: 10,
+        ops: [
+          { type: "authorize", owner: "A" },
+          { type: "deposit", owner: "A", amount: 0 },
+          { type: "withdraw", owner: "A", amount: 5 },
+        ],
+      },
+      expected: [false, false, 5],
+      hidden: true,
+    },
+  ],
+};
+
+const p3_alt3 = {
+  id: "p3-alt3",
+  title: "Budget Category Allocator",
+  difficulty: "Medium",
+  points: 30,
+  reward: 7,
+  entryName: "BudgetAllocator",
+  prompt: `
+    <p>Implement a class <code>BudgetAllocator</code> for tracking monthly
+    spending limits per category.</p>
+    <pre>class BudgetAllocator {
+  constructor(categories)     // categories: { name: monthlyLimit, ... }
+  spend(category, amount)     // if category doesn't exist, amount &lt;= 0, or
+                               // amount exceeds the remaining budget for that
+                               // category, reject and return false (no
+                               // partial spend). Otherwise deduct and return
+                               // the new remaining budget for that category.
+  remaining(category)         // returns remaining budget, or false if the
+                               // category doesn't exist
+  resetMonth()                 // resets every category's spent amount back
+                                // to 0 (full limit available again); returns true
+}</pre>
+  `,
+  starterCode:
+`class BudgetAllocator {
+  constructor(categories) {
+
+  }
+  spend(category, amount) {
+
+  }
+  remaining(category) {
+
+  }
+  resetMonth() {
+
+  }
+}`,
+  callTemplate:
+`const __input = __INPUT__;
+const b = new BudgetAllocator(__input.categories);
+const results = [];
+for (const op of __input.ops) {
+  if (op.type === 'spend') results.push(b.spend(op.category, op.amount));
+  else if (op.type === 'remaining') results.push(b.remaining(op.category));
+  else if (op.type === 'resetMonth') results.push(b.resetMonth());
+}
+return results;`,
+  tests: [
+    {
+      input: {
+        categories: { groceries: 200, entertainment: 50 },
+        ops: [
+          { type: "spend", category: "groceries", amount: 150 },
+          { type: "spend", category: "entertainment", amount: 60 },
+          { type: "spend", category: "entertainment", amount: 50 },
+          { type: "remaining", category: "groceries" },
+        ],
+      },
+      expected: [50, false, 0, 50],
+      hidden: false,
+    },
+    {
+      input: {
+        categories: { travel: 100 },
+        ops: [
+          { type: "spend", category: "travel", amount: 100 },
+          { type: "resetMonth" },
+          { type: "remaining", category: "travel" },
+          { type: "remaining", category: "rent" },
+        ],
+      },
+      expected: [0, true, 100, false],
+      hidden: false,
+    },
+    {
+      input: {
+        categories: { x: 10 },
+        ops: [
+          { type: "spend", category: "x", amount: 0 },
+          { type: "spend", category: "x", amount: -1 },
+        ],
+      },
+      expected: [false, false],
+      hidden: true,
+    },
+  ],
+};
+
+const p3_alt4 = {
+  id: "p3-alt4",
+  title: "Recurring Bill Scheduler",
+  difficulty: "Medium",
+  points: 30,
+  reward: 7,
+  entryName: "BillScheduler",
+  prompt: `
+    <p>Implement a class <code>BillScheduler</code> that pays a list of
+    recurring bills against a single balance.</p>
+    <pre>class BillScheduler {
+  constructor(balance)
+  addBill(name, amount)   // registers a bill; returns true if added, false
+                           // if amount &lt;= 0 or a bill with that name already
+                           // exists
+  removeBill(name)         // returns true if removed, false if no bill by
+                            // that name is registered
+  payAll()                  // attempts to pay every registered bill, IN THE
+                             // ORDER THEY WERE ADDED, deducting from the
+                             // balance if affordable at that point, otherwise
+                             // skipping it (balance unaffected by a skip).
+                             // Returns { balance, paid, skipped } — the
+                             // ending balance and the names paid/skipped, in
+                             // the order they were processed.
+}</pre>
+  `,
+  starterCode:
+`class BillScheduler {
+  constructor(balance) {
+
+  }
+  addBill(name, amount) {
+
+  }
+  removeBill(name) {
+
+  }
+  payAll() {
+
+  }
+}`,
+  callTemplate:
+`const __input = __INPUT__;
+const s = new BillScheduler(__input.balance);
+const results = [];
+for (const op of __input.ops) {
+  if (op.type === 'addBill') results.push(s.addBill(op.name, op.amount));
+  else if (op.type === 'removeBill') results.push(s.removeBill(op.name));
+  else if (op.type === 'payAll') results.push(s.payAll());
+}
+return results;`,
+  tests: [
+    {
+      input: {
+        balance: 100,
+        ops: [
+          { type: "addBill", name: "rent", amount: 60 },
+          { type: "addBill", name: "rent", amount: 10 },
+          { type: "addBill", name: "internet", amount: 30 },
+          { type: "addBill", name: "phone", amount: 50 },
+          { type: "removeBill", name: "cable" },
+          { type: "payAll" },
+        ],
+      },
+      expected: [true, false, true, true, false, { balance: 10, paid: ["rent", "internet"], skipped: ["phone"] }],
+      hidden: false,
+    },
+    {
+      input: {
+        balance: 200,
+        ops: [
+          { type: "addBill", name: "rent", amount: 60 },
+          { type: "removeBill", name: "rent" },
+          { type: "payAll" },
+        ],
+      },
+      expected: [true, true, { balance: 200, paid: [], skipped: [] }],
+      hidden: false,
+    },
+    {
+      input: {
+        balance: 0,
+        ops: [
+          { type: "addBill", name: "a", amount: 5 },
+          { type: "payAll" },
+        ],
+      },
+      expected: [true, { balance: 0, paid: [], skipped: ["a"] }],
+      hidden: true,
+    },
+  ],
+};
+
+const p4_alt2 = {
+  id: "p4-alt2",
+  title: "Wire Transfer Approval Workflow",
+  difficulty: "Hard",
+  points: 35,
+  reward: 8,
+  entryName: "runWireTransferMachine",
+  prompt: `
+    <p>Model a wire transfer's approval workflow and write
+    <code>runWireTransferMachine(events)</code>, where <code>events</code>
+    is an array of event name strings. Return an array with one result
+    string per event.</p>
+    <p><strong>States</strong> (start <code>DRAFTED</code>):
+    <code>DRAFTED</code> → <code>PENDING_APPROVAL</code> →
+    (<code>APPROVED</code> | <code>REJECTED</code>); <code>APPROVED</code>
+    → <code>SENT</code>. <code>SENT</code>, <code>REJECTED</code>, and
+    <code>CANCELLED</code> are terminal.</p>
+    <ul>
+      <li><code>"submit"</code> — valid only in <code>DRAFTED</code>; moves
+      to <code>PENDING_APPROVAL</code>, emits <code>"PENDING_APPROVAL"</code>.
+      Otherwise <code>"INVALID_ACTION"</code>.</li>
+      <li><code>"approve"</code> — valid only in
+      <code>PENDING_APPROVAL</code>; moves to <code>APPROVED</code>, emits
+      <code>"APPROVED"</code>. Otherwise <code>"INVALID_ACTION"</code>.</li>
+      <li><code>"reject"</code> — valid only in
+      <code>PENDING_APPROVAL</code>; moves to <code>REJECTED</code>, emits
+      <code>"REJECTED"</code>. Otherwise <code>"INVALID_ACTION"</code>.</li>
+      <li><code>"send"</code> — valid only in <code>APPROVED</code>; moves to
+      <code>SENT</code>, emits <code>"SENT"</code>. Otherwise
+      <code>"INVALID_ACTION"</code>.</li>
+      <li><code>"cancel"</code> — valid in <code>DRAFTED</code> or
+      <code>PENDING_APPROVAL</code>; moves to <code>CANCELLED</code>, emits
+      <code>"CANCELLED"</code>. Otherwise <code>"INVALID_ACTION"</code>.</li>
+    </ul>
+    <p>Once terminal, every subsequent event of any type emits
+    <code>"WORKFLOW_CLOSED"</code> forever.</p>
+  `,
+  starterCode:
+`function runWireTransferMachine(events) {
+  // events: string[] — see the event list above
+  // return an array of result strings, one per event
+
+}`,
+  callTemplate: "return runWireTransferMachine(__INPUT__);",
+  tests: [
+    { input: ["submit", "approve", "send"], expected: ["PENDING_APPROVAL", "APPROVED", "SENT"], hidden: false },
+    {
+      input: ["approve", "submit", "cancel", "submit"],
+      expected: ["INVALID_ACTION", "PENDING_APPROVAL", "CANCELLED", "WORKFLOW_CLOSED"],
+      hidden: false,
+    },
+    {
+      input: ["submit", "reject", "approve", "send"],
+      expected: ["PENDING_APPROVAL", "REJECTED", "WORKFLOW_CLOSED", "WORKFLOW_CLOSED"],
+      hidden: true,
+    },
+  ],
+};
+
+const p4_alt3 = {
+  id: "p4-alt3",
+  title: "Fraud Hold Review State Machine",
+  difficulty: "Hard",
+  points: 35,
+  reward: 8,
+  entryName: "runFraudHoldMachine",
+  prompt: `
+    <p>Model an account's fraud-hold review flow and write
+    <code>runFraudHoldMachine(events)</code>, where <code>events</code> is
+    an array of event name strings. Return an array with one result string
+    per event.</p>
+    <p><strong>States</strong> (start <code>ACTIVE</code>):
+    <code>ACTIVE</code> ⇄ <code>HOLD</code>; both can move to the terminal
+    <code>CLOSED</code> state.</p>
+    <ul>
+      <li><code>"flag"</code> — valid only in <code>ACTIVE</code>; moves to
+      <code>HOLD</code>, emits <code>"HOLD"</code>. Otherwise
+      <code>"INVALID_ACTION"</code>.</li>
+      <li><code>"clear"</code> — valid only in <code>HOLD</code>; moves to
+      <code>ACTIVE</code>, emits <code>"ACTIVE"</code>. Otherwise
+      <code>"INVALID_ACTION"</code>.</li>
+      <li><code>"confirmFraud"</code> — valid only in <code>HOLD</code>;
+      moves to <code>CLOSED</code>, emits <code>"CLOSED"</code>. Otherwise
+      <code>"INVALID_ACTION"</code>.</li>
+      <li><code>"closeAccount"</code> — valid in <code>ACTIVE</code> or
+      <code>HOLD</code>; moves to <code>CLOSED</code>, emits
+      <code>"CLOSED"</code>. Otherwise <code>"INVALID_ACTION"</code>.</li>
+    </ul>
+    <p>Once <code>CLOSED</code>, every subsequent event emits
+    <code>"ACCOUNT_CLOSED"</code> forever.</p>
+  `,
+  starterCode:
+`function runFraudHoldMachine(events) {
+  // events: string[] — see the event list above
+  // return an array of result strings, one per event
+
+}`,
+  callTemplate: "return runFraudHoldMachine(__INPUT__);",
+  tests: [
+    {
+      input: ["flag", "clear", "flag", "confirmFraud", "clear"],
+      expected: ["HOLD", "ACTIVE", "HOLD", "CLOSED", "ACCOUNT_CLOSED"],
+      hidden: false,
+    },
+    { input: ["clear", "closeAccount", "flag"], expected: ["INVALID_ACTION", "CLOSED", "ACCOUNT_CLOSED"], hidden: false },
+    {
+      input: ["flag", "closeAccount", "confirmFraud"],
+      expected: ["HOLD", "CLOSED", "ACCOUNT_CLOSED"],
+      hidden: true,
+    },
+  ],
+};
+
+const p4_alt4 = {
+  id: "p4-alt4",
+  title: "Two-Factor Login State Machine",
+  difficulty: "Hard",
+  points: 35,
+  reward: 8,
+  entryName: "runLoginMachine",
+  prompt: `
+    <p>Model a password + 2FA login flow and write
+    <code>runLoginMachine(correctPassword, correctCode, events)</code>,
+    which returns an array with one result string per event.</p>
+    <p><strong>States:</strong> <code>LOGGED_OUT</code> →
+    <code>AWAITING_2FA</code> → <code>LOGGED_IN</code>, plus a permanent
+    <code>LOCKED</code> state.</p>
+    <ul>
+      <li><code>{type:"enterPassword", password}</code> — valid only in
+      <code>LOGGED_OUT</code>; otherwise emits
+      <code>"ALREADY_IN_PROGRESS"</code>. If <code>password ===
+      correctPassword</code>, move to <code>AWAITING_2FA</code> (reset the
+      wrong-code counter) and emit <code>"AWAITING_2FA"</code>. Otherwise
+      emit <code>"INVALID_PASSWORD"</code> and stay in
+      <code>LOGGED_OUT</code>.</li>
+      <li><code>{type:"enterCode", code}</code> — valid only in
+      <code>AWAITING_2FA</code>; otherwise emits
+      <code>"NO_2FA_PENDING"</code>. If <code>code === correctCode</code>,
+      move to <code>LOGGED_IN</code> and emit <code>"LOGGED_IN"</code>.
+      Otherwise increment the wrong-code counter; on the 3rd wrong code
+      move to <code>LOCKED</code> and emit <code>"ACCOUNT_LOCKED"</code>,
+      otherwise emit <code>"INVALID_CODE_ATTEMPTS_LEFT_&lt;n&gt;"</code>
+      where <code>n</code> is attempts remaining before lock.</li>
+    </ul>
+    <p>Once <code>LOCKED</code>, every subsequent event emits
+    <code>"ACCOUNT_LOCKED"</code> forever.</p>
+  `,
+  starterCode:
+`function runLoginMachine(correctPassword, correctCode, events) {
+  // return an array of result strings, one per event
+
+}`,
+  callTemplate: "return runLoginMachine(__INPUT__.correctPassword, __INPUT__.correctCode, __INPUT__.events);",
+  tests: [
+    {
+      input: {
+        correctPassword: "pw1",
+        correctCode: "123456",
+        events: [
+          { type: "enterPassword", password: "wrong" },
+          { type: "enterPassword", password: "pw1" },
+          { type: "enterCode", code: "000000" },
+          { type: "enterCode", code: "123456" },
+        ],
+      },
+      expected: ["INVALID_PASSWORD", "AWAITING_2FA", "INVALID_CODE_ATTEMPTS_LEFT_2", "LOGGED_IN"],
+      hidden: false,
+    },
+    {
+      input: {
+        correctPassword: "pw1",
+        correctCode: "123456",
+        events: [
+          { type: "enterCode", code: "000000" },
+          { type: "enterPassword", password: "pw1" },
+          { type: "enterCode", code: "111111" },
+          { type: "enterCode", code: "222222" },
+          { type: "enterCode", code: "333333" },
+          { type: "enterPassword", password: "pw1" },
+        ],
+      },
+      expected: [
+        "NO_2FA_PENDING",
+        "AWAITING_2FA",
+        "INVALID_CODE_ATTEMPTS_LEFT_2",
+        "INVALID_CODE_ATTEMPTS_LEFT_1",
+        "ACCOUNT_LOCKED",
+        "ACCOUNT_LOCKED",
+      ],
+      hidden: false,
+    },
+    {
+      input: {
+        correctPassword: "pw1",
+        correctCode: "123456",
+        events: [
+          { type: "enterPassword", password: "pw1" },
+          { type: "enterPassword", password: "pw1" },
+          { type: "enterCode", code: "123456" },
+        ],
+      },
+      expected: ["AWAITING_2FA", "ALREADY_IN_PROGRESS", "LOGGED_IN"],
+      hidden: true,
+    },
+  ],
+};
+
 window.PROBLEM_SLOTS = [
-  [window.PROBLEMS[0], p1_alt],
-  [window.PROBLEMS[1], p2_alt],
-  [window.PROBLEMS[2], p3_alt],
-  [window.PROBLEMS[3], p4_alt],
+  [window.PROBLEMS[0], p1_alt, p1_alt2, p1_alt3, p1_alt4],
+  [window.PROBLEMS[1], p2_alt, p2_alt2, p2_alt3, p2_alt4],
+  [window.PROBLEMS[2], p3_alt, p3_alt2, p3_alt3, p3_alt4],
+  [window.PROBLEMS[3], p4_alt, p4_alt2, p4_alt3, p4_alt4],
 ];
 
 window.buildProblemSet = function () {

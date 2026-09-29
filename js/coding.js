@@ -22,7 +22,7 @@ window.OACoding = (function () {
       tab.className = "problem-tab" + (p.id === state.coding.currentProblemId ? " active" : "");
       const score = state.coding.scores[p.id];
       tab.innerHTML = `
-        <div class="diff ${p.difficulty}">${p.difficulty} · ${p.points} pts</div>
+        <div class="diff ${p.difficulty}">${p.difficulty} · ${p.points} pts · $${p.reward || 0}</div>
         <div>${p.title}</div>
         ${score !== undefined ? `<div class="score-badge">${score}/${p.points} earned</div>` : ""}
       `;

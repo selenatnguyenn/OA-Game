@@ -33,17 +33,23 @@ python3 -m http.server 8000
 
 ## What's inside
 
-- **Round 1 — Situational Judgment (untimed).** Eight original work scenarios.
-  For each, you pick the response you think is most effective and the one
-  you think is least effective — the common "most/least" format real
-  situational-judgment tests use, matching the "Virtual Job Tryout" step
-  Capital One's OA invite email describes. Covers competencies like
-  ownership, customer focus, integrity/risk-awareness, and adaptability.
-- **Round 2 — Coding (70 min, 100 pts).** Four problems (Easy/Easy/Medium/Hard)
-  themed around bank transactions, statement formatting, an account-management
-  class, and an ATM state machine. Your code runs in a sandboxed Web Worker
-  against visible and hidden test cases (with a timeout, so an infinite loop
-  can't hang the page).
+- **A 60-question practice bank.** 20 situational-judgment scenarios, 20
+  behavioral questions (12 STAR + 8 motivation), and 20 coding problems (5
+  variants across each of the 4 difficulty slots) — enough variety that
+  repeated practice runs rarely look the same twice.
+- **Round 1 — Situational Judgment (untimed).** Each run draws 8 scenarios
+  from the 20-scenario pool. For each, you pick the response you think is
+  most effective and the one you think is least effective — the common
+  "most/least" format real situational-judgment tests use, matching the
+  "Virtual Job Tryout" step Capital One's OA invite email describes. Covers
+  competencies like ownership, customer focus, integrity/risk-awareness,
+  adaptability, delegation, handling pressure, and more.
+- **Round 2 — Coding (70 min, 100 pts).** Each run draws one problem per
+  difficulty slot (Easy/Easy/Medium/Hard) from a 20-problem bank themed
+  around bank transactions, statement formatting, account/budget/bill
+  management classes, and ATM/login/workflow state machines. Your code runs
+  in a sandboxed Web Worker against visible and hidden test cases (with a
+  timeout, so an infinite loop can't hang the page).
 - **OA Results screen** with separate situational-judgment and coding scores,
   a per-scenario breakdown (your pick vs. the recommended most/least
   effective response), and a per-problem coding breakdown.
@@ -53,18 +59,22 @@ python3 -m http.server 8000
   practice, plus a short case-interview framework (Clarify → Structure →
   Analyze → Recommend → Sanity-check) with a sample prompt to practice out
   loud.
-- **Behavioral practice (used from Power Day Prep).** Ten questions across
-  two sections (STAR behavioral + motivation/mini-case). Each question gives
-  30 seconds of silent prep time, then a timed typed response window,
-  mirroring a "prep, then answer" interview structure. Answers are
-  self-graded at the end against a Situation/Task/Action/Result checklist.
-- **OA Bucks & Reward Shop.** Purely cosmetic gamification: earn $1 for every
-  situational scenario you get fully right (Most *and* Least correct), $1 for
-  every coding problem you fully solve, and a speed bonus for finishing
-  coding with time to spare. Spend the balance on cute emoji "companions" in
-  the Reward Shop. Balance and collection persist in `localStorage`, so they
-  carry over between practice runs in the same browser — nothing here affects
-  your actual score.
+- **Behavioral practice (used from Power Day Prep).** Each run draws 10
+  questions (6 STAR + 4 motivation/mini-case) from the 20-question pool.
+  Each question gives 30 seconds of silent prep time, then a timed typed
+  response window, mirroring a "prep, then answer" interview structure.
+  Answers are self-graded at the end against a Situation/Task/Action/Result
+  checklist.
+- **OA Bucks & Reward Shop.** Purely cosmetic gamification, scaled so a full
+  practice run can earn up to **$60**: $3 for every situational scenario you
+  get fully right (Most *and* Least correct, up to $24), $4–$8 for every
+  coding problem you fully solve depending on difficulty (up to $24), an up
+  to $8 speed bonus for finishing coding with time to spare, and $4 for
+  completing a Power Day behavioral practice. Spend the balance on 16 cute
+  emoji "companions" in the Reward Shop, from a $8 coffee up to a $60 "TDP
+  Offer Trophy." Balance and collection persist in `localStorage`, so they
+  carry over between practice runs in the same browser — nothing here
+  affects your actual score.
 - **Goals.** Six achievement-style goals (first run, strong situational score,
   strong coding score, a Power Day behavioral practice, collecting 3 shop
   items, 3 full practice runs) that each pay a one-time OA Bucks bonus the
@@ -98,8 +108,12 @@ question categories) of the real process.
 
 - Add/edit coding problems in `data/problems.js`. Each problem needs an
   `entryName`, a `callTemplate` (a snippet that calls into whatever the
-  candidate writes, with `__INPUT__` substituted per test case), and a list of
-  `tests` (`hidden: true` tests aren't shown to the user in detail).
+  candidate writes, with `__INPUT__` substituted per test case), a `reward`
+  (OA Bucks paid for fully solving it), and a list of `tests` (`hidden: true`
+  tests aren't shown to the user in detail). `window.PROBLEM_SLOTS` groups
+  variants by difficulty; add a new variant to a slot's array to grow the
+  bank further, and give it the same `points`/`reward` as its slot so a run's
+  total stays consistent no matter which variant gets picked.
 - Add/edit situational judgment scenarios in `data/situational.js`. Each
   scenario needs 4 `options`, each with a unique `rank` (1 = most effective,
   4 = least effective).

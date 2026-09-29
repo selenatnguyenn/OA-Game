@@ -211,28 +211,33 @@
     const sjPct = Math.round((sj.points / sj.total) * 100);
     const sjVerdict = sjVerdictFor(sjPct);
 
-    // --- OA Bucks: $1 per fully-correct scenario/problem, plus a coding
-    // speed bonus. Situational dollars are only ever paid out once per OA
-    // session (the round isn't timed/re-run the way coding is), so revisiting
-    // results via a Power Day "redo coding" pass doesn't double-pay them.
+    // --- OA Bucks: a full session (situational + coding + speed bonus) tops
+    // out at $56, and a Power Day behavioral practice adds up to $4 more —
+    // $60 total for the whole pipeline. Situational dollars are only ever
+    // paid out once per OA session (the round isn't timed/re-run the way
+    // coding is), so revisiting results via a Power Day "redo coding" pass
+    // doesn't double-pay them.
     const isFirstCompletionThisSession = !state.situational.rewardClaimed;
     const sjSolvedCount = sj.detail.filter((d) => d.mostCorrect && d.leastCorrect).length;
-    const sjDollarsThisTime = state.situational.rewardClaimed ? 0 : sjSolvedCount;
+    const SJ_DOLLARS_PER_SCENARIO = 3;
+    const sjDollarsThisTime = state.situational.rewardClaimed ? 0 : sjSolvedCount * SJ_DOLLARS_PER_SCENARIO;
     state.situational.rewardClaimed = true;
 
-    const codingSolvedCount = window.PROBLEMS.filter((p) => (state.coding.scores[p.id] || 0) === p.points).length;
+    const solvedProblems = window.PROBLEMS.filter((p) => (state.coding.scores[p.id] || 0) === p.points);
+    const codingSolvedCount = solvedProblems.length;
+    const codingDollars = solvedProblems.reduce((sum, p) => sum + (p.reward || 0), 0);
 
     let timeBonus = 0;
     let timeBonusLabel = "";
     if (state.coding.timeLeftSec >= 1800) {
-      timeBonus = 3;
+      timeBonus = 8;
       timeBonusLabel = "⚡ Lightning Bonus — finished with 30+ minutes to spare";
     } else if (state.coding.timeLeftSec >= 600) {
-      timeBonus = 1;
+      timeBonus = 4;
       timeBonusLabel = "⏱️ On-Time Bonus — finished with time to spare";
     }
 
-    const totalEarned = sjDollarsThisTime + codingSolvedCount + timeBonus;
+    const totalEarned = sjDollarsThisTime + codingDollars + timeBonus;
     window.OAWallet.earn(totalEarned);
 
     window.OAGoals.recordRun(sjPct, codingPct, isFirstCompletionThisSession);
@@ -265,12 +270,13 @@
       <div class="card">
         <ul class="tight">
           <li>Situational scenarios nailed (Most <em>and</em> Least correct): ${sjSolvedCount}/8 → ${sjDollarsThisTime > 0 ? `+$${sjDollarsThisTime}` : "$0 (already counted on an earlier run)"}</li>
-          <li>Coding problems fully solved: ${codingSolvedCount}/4 → +$${codingSolvedCount}</li>
+          <li>Coding problems fully solved: ${codingSolvedCount}/4 → +$${codingDollars}</li>
           ${timeBonus > 0 ? `<li>${timeBonusLabel} → +$${timeBonus}</li>` : `<li>No speed bonus this run — finish with 10+ minutes left for one next time.</li>`}
         </ul>
         <div class="verdict strong" style="margin-bottom:0;">
           +$${totalEarned} earned this run · new balance: $${newBalance}
         </div>
+        <p style="color:var(--text-dim); margin: 8px 0 0;">A perfect situational round + a perfect coding round + the speed bonus caps at $56 per OA run — finish a Power Day behavioral practice too and you can earn up to $60 total.</p>
         ${goalUnlockedHtml(newlyGoals)}
       </div>
 
@@ -509,10 +515,13 @@
     window.OABehavioral.render(state, screens.behavioral.querySelector(".behavioral-body"), showBehavioralReview);
   }
 
+  const BEHAVIORAL_COMPLETION_REWARD = 4;
+
   function showBehavioralReview() {
     window.OABehavioral.clearTimer(state);
     showScreen("behavioralReview");
 
+    window.OAWallet.earn(BEHAVIORAL_COMPLETION_REWARD);
     window.OAGoals.markBehavioralTried();
     const { newly: newlyGoals } = awardNewlyCompletedGoals();
     updateWalletBadge();
@@ -520,6 +529,7 @@
     const root = screens.behavioralReview.querySelector(".behavioral-review-body");
     root.innerHTML = `
       <p style="color: var(--text-dim);">Self-grade each answer against the STAR framework — this is not auto-scored.</p>
+      <div class="verdict strong">+$${BEHAVIORAL_COMPLETION_REWARD} earned for completing this Power Day behavioral practice · new balance: $${window.OAWallet.getBalance()}</div>
       ${goalUnlockedHtml(newlyGoals)}
       <div id="behavioral-breakdown"></div>
       <div class="center" style="margin-top:24px;">

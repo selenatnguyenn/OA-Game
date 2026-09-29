@@ -5,7 +5,7 @@
 
    The pool below has more questions than any one session asks —
    window.buildBehavioralSet() randomly picks and shuffles a subset into
-   window.BEHAVIORAL (6 of 8 STAR questions + 4 of 6 Motivation questions)
+   window.BEHAVIORAL (6 of 12 STAR questions + 4 of 8 Motivation questions)
    so repeated practice runs don't always ask the same 10 in the same order. */
 
 window.BEHAVIORAL_POOL = {
@@ -50,6 +50,26 @@ window.BEHAVIORAL_POOL = {
       q: "Describe a time you had to give difficult feedback to a peer.",
       tip: "Focus on how you made the feedback specific and actionable, not just honest.",
     },
+    {
+      section: "Behavioral (STAR)",
+      q: "Tell me about a time you had to perform under significant pressure or a very tight deadline.",
+      tip: "Describe the specific pressure you were under, then walk through exactly what you did to manage it.",
+    },
+    {
+      section: "Behavioral (STAR)",
+      q: "Describe a time you volunteered for a task that was outside your comfort zone.",
+      tip: "Be honest about the discomfort, then focus on what you did to close the gap and what you learned.",
+    },
+    {
+      section: "Behavioral (STAR)",
+      q: "Tell me about a time you had to persuade a skeptical teammate or stakeholder to support your idea.",
+      tip: "Explain the specific objection they had and what you did to address it, not just that you 'convinced them.'",
+    },
+    {
+      section: "Behavioral (STAR)",
+      q: "Describe a time you noticed and fixed a problem before anyone asked you to.",
+      tip: "Emphasize how you noticed it and why you decided to act, not just the fix itself.",
+    },
   ],
   motivation: [
     {
@@ -81,6 +101,16 @@ window.BEHAVIORAL_POOL = {
       section: "Motivation & Mini Case",
       q: "Tell me about a time you balanced speed and quality under a tight deadline.",
       tip: "Be honest about the trade-off you made and why, not just that you 'did both.'",
+    },
+    {
+      section: "Motivation & Mini Case",
+      q: "What's a technology or trend in banking/fintech that genuinely excites you right now?",
+      tip: "Pick something specific and explain why it matters, rather than a generic buzzword answer.",
+    },
+    {
+      section: "Motivation & Mini Case",
+      q: "Tell me about a time you had to make a decision without all the information you wanted.",
+      tip: "Explain how you weighed the risk of waiting for more information against the risk of acting without it.",
     },
   ],
 };
