@@ -15,6 +15,7 @@
   --pass: #37c874;
   --fail: #e5484d;
   --warn: #e5a94d;
+  --gold: #f5c542;
   font-size: 17px;
 }
 
@@ -452,3 +453,52 @@ footer.note {
   font-size: 0.78rem;
   padding: 20px;
 }
+
+/* WALLET & SHOP */
+.timer-pill.stopwatch { border-color: var(--gold); color: var(--gold); }
+
+.wallet-badge {
+  background: var(--panel-alt);
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  border-radius: 999px;
+  padding: 6px 16px;
+  font-weight: 700;
+  font-family: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.wallet-badge:hover { background: rgba(245, 197, 66, 0.12); }
+
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+.shop-item {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.shop-item .emoji { font-size: 2.6rem; }
+.shop-item .name { font-weight: 700; }
+.shop-item .flavor { color: var(--text-dim); font-size: 0.85rem; min-height: 2.6em; }
+.shop-item .cost { color: var(--gold); font-weight: 700; }
+.shop-item.owned { border-color: var(--pass); }
+.shop-item .owned-tag { color: var(--pass); font-weight: 700; font-size: 0.85rem; }
+
+.owned-shelf {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 1.6rem;
+  margin-top: 6px;
+}
+.owned-shelf .empty { font-size: 0.85rem; color: var(--text-dim); }

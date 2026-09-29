@@ -19,7 +19,10 @@
 
 <header class="topbar">
   <div class="brand">TDP <span>Practice</span> OA</div>
-  <span class="timer-pill" id="global-timer" style="display:none;"></span>
+  <div style="display:flex; align-items:center; gap:10px;">
+    <span class="timer-pill" id="global-timer" style="display:none;"></span>
+    <button class="wallet-badge" id="wallet-badge" title="Visit the Reward Shop">💰 <span id="wallet-amount">$0</span></button>
+  </div>
 </header>
 
 <main>
@@ -61,6 +64,21 @@
       Each practice run pulls a fresh mix — the 8 situational scenarios, one problem per coding
       difficulty, and the 10 behavioral questions are all randomly picked and shuffled from a
       larger pool, so repeated runs don't just repeat the same set.
+    </div>
+
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div>
+          <h3 style="margin-bottom:4px;">💰 Earn OA Bucks as you go</h3>
+          <p style="color:var(--text-dim); margin:0;">
+            $1 for every situational scenario you nail (both Most and Least correct), $1 for every
+            coding problem you fully solve, plus a speed bonus for finishing coding with time to
+            spare. Balance carries over between runs in this browser — spend it on cute, purely
+            cosmetic rewards.
+          </p>
+        </div>
+        <button class="btn secondary" id="view-shop-btn">Visit Reward Shop</button>
+      </div>
     </div>
 
     <div class="card">
@@ -120,6 +138,13 @@
     <div class="behavioral-review-body"></div>
   </section>
 
+  <section class="screen" id="screen-shop">
+    <div class="hero" style="padding-top:0;">
+      <h1>Reward Shop</h1>
+    </div>
+    <div class="shop-body"></div>
+  </section>
+
 </main>
 
 <footer class="note">
@@ -129,6 +154,8 @@
 <script src="data/problems.js"></script>
 <script src="data/behavioral.js"></script>
 <script src="data/situational.js"></script>
+<script src="data/shop.js"></script>
+<script src="js/wallet.js"></script>
 <script src="js/runner.js"></script>
 <script src="js/coding.js"></script>
 <script src="js/behavioralUI.js"></script>

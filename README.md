@@ -58,6 +58,13 @@ python3 -m http.server 8000
   30 seconds of silent prep time, then a timed typed response window,
   mirroring a "prep, then answer" interview structure. Answers are
   self-graded at the end against a Situation/Task/Action/Result checklist.
+- **OA Bucks & Reward Shop.** Purely cosmetic gamification: earn $1 for every
+  situational scenario you get fully right (Most *and* Least correct), $1 for
+  every coding problem you fully solve, and a speed bonus for finishing
+  coding with time to spare. Spend the balance on cute emoji "companions" in
+  the Reward Shop. Balance and collection persist in `localStorage`, so they
+  carry over between practice runs in the same browser — nothing here affects
+  your actual score.
 
 ## Why it's built this way (sources)
 
@@ -93,4 +100,8 @@ question categories) of the real process.
 - Add/edit behavioral questions in `data/behavioral.js`.
 - Timing constants live in `js/app.js` (`CODING_SECONDS`) and
   `js/behavioralUI.js` (`THINK_SECONDS`, `ANSWER_SECONDS`). The situational
-  round is untimed by design, matching the real Virtual Job Tryout.
+  round is untimed by design, matching the real Virtual Job Tryout (though
+  a stopwatch tracks how long you spend, just for your own info).
+- Add/edit reward-shop items in `data/shop.js`. Wallet balance and ownership
+  are managed by `js/wallet.js` (`window.OAWallet`), stored under the
+  `tdpPracticeWallet` `localStorage` key.

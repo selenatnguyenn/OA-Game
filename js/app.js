@@ -14,6 +14,9 @@
       situational: {
         index: 0,
         answers: {},
+        elapsedSec: 0,
+        timerHandle: null,
+        rewardClaimed: false,
       },
       coding: {
         currentProblemId: window.PROBLEMS[0].id,
@@ -43,8 +46,15 @@
     powerday: document.getElementById("screen-powerday"),
     behavioral: document.getElementById("screen-behavioral"),
     behavioralReview: document.getElementById("screen-behavioral-review"),
+    shop: document.getElementById("screen-shop"),
   };
   const timerPill = document.getElementById("global-timer");
+  const walletBadge = document.getElementById("wallet-badge");
+  const walletAmountEl = document.getElementById("wallet-amount");
+
+  function updateWalletBadge() {
+    walletAmountEl.textContent = "$" + window.OAWallet.getBalance();
+  }
 
   function showScreen(name) {
     state.screen = name;
@@ -67,11 +77,39 @@
     }
   }
 
+  function clearSituationalTimer() {
+    if (state.situational.timerHandle) {
+      clearInterval(state.situational.timerHandle);
+      state.situational.timerHandle = null;
+    }
+  }
+
   function startSituational() {
     state.situational.index = 0;
     state.situational.answers = {};
+    state.situational.elapsedSec = 0;
     showScreen("situational");
-    window.OASituational.render(state, screens.situational.querySelector(".situational-body"), startCoding);
+
+    // Untimed by design — this is a stopwatch (counts up), not a countdown,
+    // just so you can see how long you spent.
+    clearSituationalTimer();
+    timerPill.style.display = "inline-block";
+    timerPill.classList.remove("low", "critical");
+    timerPill.classList.add("stopwatch");
+    timerPill.textContent = fmtClock(state.situational.elapsedSec);
+    state.situational.timerHandle = setInterval(() => {
+      state.situational.elapsedSec += 1;
+      timerPill.textContent = fmtClock(state.situational.elapsedSec);
+    }, 1000);
+
+    window.OASituational.render(state, screens.situational.querySelector(".situational-body"), finishSituational);
+  }
+
+  function finishSituational() {
+    clearSituationalTimer();
+    timerPill.classList.remove("stopwatch");
+    timerPill.style.display = "none";
+    startCoding();
   }
 
   function startCoding() {
@@ -79,6 +117,7 @@
     clearCodingTimer();
     showScreen("coding");
     timerPill.style.display = "inline-block";
+    timerPill.classList.remove("stopwatch", "low", "critical");
     timerPill.textContent = fmtClock(state.coding.timeLeftSec);
     window.OACoding.renderAll(state, screens.coding.querySelector(".coding-body"));
 
@@ -127,12 +166,38 @@
     const sjPct = Math.round((sj.points / sj.total) * 100);
     const sjVerdict = sjVerdictFor(sjPct);
 
+    // --- OA Bucks: $1 per fully-correct scenario/problem, plus a coding
+    // speed bonus. Situational dollars are only ever paid out once per OA
+    // session (the round isn't timed/re-run the way coding is), so revisiting
+    // results via a Power Day "redo coding" pass doesn't double-pay them.
+    const sjSolvedCount = sj.detail.filter((d) => d.mostCorrect && d.leastCorrect).length;
+    const sjDollarsThisTime = state.situational.rewardClaimed ? 0 : sjSolvedCount;
+    state.situational.rewardClaimed = true;
+
+    const codingSolvedCount = window.PROBLEMS.filter((p) => (state.coding.scores[p.id] || 0) === p.points).length;
+
+    let timeBonus = 0;
+    let timeBonusLabel = "";
+    if (state.coding.timeLeftSec >= 1800) {
+      timeBonus = 3;
+      timeBonusLabel = "⚡ Lightning Bonus — finished with 30+ minutes to spare";
+    } else if (state.coding.timeLeftSec >= 600) {
+      timeBonus = 1;
+      timeBonusLabel = "⏱️ On-Time Bonus — finished with time to spare";
+    }
+
+    const totalEarned = sjDollarsThisTime + codingSolvedCount + timeBonus;
+    window.OAWallet.earn(totalEarned);
+    updateWalletBadge();
+    const newBalance = window.OAWallet.getBalance();
+
     const root = screens.results.querySelector(".results-body");
     root.innerHTML = `
       <h3>Situational Judgment</h3>
       <div class="score-summary">
         <div class="score-tile"><div class="num">${sj.points}/${sj.total}</div><div class="label">SJ points</div></div>
         <div class="score-tile"><div class="num">${sjPct}%</div><div class="label">SJ percentage</div></div>
+        <div class="score-tile"><div class="num">${fmtClock(state.situational.elapsedSec)}</div><div class="label">Time spent (untimed round)</div></div>
       </div>
       <div class="verdict ${sjVerdict.cls}">${sjVerdict.text}</div>
       <div id="sj-breakdown"></div>
@@ -146,8 +211,21 @@
       <div class="verdict ${codingVerdict.cls}">${codingVerdict.text}</div>
       <div id="problem-breakdown"></div>
 
+      <h3 style="margin-top:28px;">💰 OA Bucks Earned</h3>
+      <div class="card">
+        <ul class="tight">
+          <li>Situational scenarios nailed (Most <em>and</em> Least correct): ${sjSolvedCount}/8 → ${sjDollarsThisTime > 0 ? `+$${sjDollarsThisTime}` : "$0 (already counted on an earlier run)"}</li>
+          <li>Coding problems fully solved: ${codingSolvedCount}/4 → +$${codingSolvedCount}</li>
+          ${timeBonus > 0 ? `<li>${timeBonusLabel} → +$${timeBonus}</li>` : `<li>No speed bonus this run — finish with 10+ minutes left for one next time.</li>`}
+        </ul>
+        <div class="verdict strong" style="margin-bottom:0;">
+          +$${totalEarned} earned this run · new balance: $${newBalance}
+        </div>
+      </div>
+
       <div class="center" style="margin-top:28px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
         <button class="btn" id="powerday-btn">What's Next: Power Day Prep →</button>
+        <button class="btn secondary" id="shop-btn-results">Visit Reward Shop</button>
         <button class="btn secondary" id="restart-btn">Restart Practice OA</button>
       </div>
     `;
@@ -190,10 +268,87 @@
     });
 
     root.querySelector("#powerday-btn").addEventListener("click", showPowerDay);
+    root.querySelector("#shop-btn-results").addEventListener("click", showShop);
     root.querySelector("#restart-btn").addEventListener("click", () => {
       state = freshState();
       showScreen("home");
     });
+  }
+
+  function renderOwnedShelf() {
+    const shelf = screens.shop.querySelector("#owned-shelf");
+    if (!shelf) return;
+    const owned = window.OAWallet.getOwned();
+    if (owned.length === 0) {
+      shelf.innerHTML = `<span class="empty">Nothing yet — earn some OA Bucks and come back!</span>`;
+      return;
+    }
+    shelf.innerHTML = owned
+      .map((id) => {
+        const item = window.SHOP_ITEMS.find((i) => i.id === id);
+        return item ? `<span title="${item.name}">${item.emoji}</span>` : "";
+      })
+      .join("");
+  }
+
+  function renderShopGrid() {
+    const grid = screens.shop.querySelector("#shop-grid");
+    const balance = window.OAWallet.getBalance();
+    grid.innerHTML = window.SHOP_ITEMS.map((item) => {
+      const owned = window.OAWallet.isOwned(item.id);
+      const canAfford = balance >= item.cost;
+      return `
+        <div class="shop-item ${owned ? "owned" : ""}">
+          <div class="emoji">${item.emoji}</div>
+          <div class="name">${item.name}</div>
+          <div class="flavor">${item.flavor}</div>
+          ${
+            owned
+              ? `<div class="owned-tag">✓ Owned</div>`
+              : `<div class="cost">$${item.cost}</div><button class="btn small" data-buy="${item.id}" ${canAfford ? "" : "disabled"}>${canAfford ? "Buy" : "Need more $"}</button>`
+          }
+        </div>
+      `;
+    }).join("");
+
+    grid.querySelectorAll("[data-buy]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const item = window.SHOP_ITEMS.find((i) => i.id === btn.getAttribute("data-buy"));
+        if (item && window.OAWallet.buy(item.id, item.cost)) {
+          updateWalletBadge();
+          renderShopGrid();
+          renderOwnedShelf();
+        }
+      });
+    });
+  }
+
+  function showShop() {
+    showScreen("shop");
+    const root = screens.shop.querySelector(".shop-body");
+    root.innerHTML = `
+      <div class="card">
+        <p style="color:var(--text-dim); margin:0;">
+          Purely cosmetic — nothing here affects your score. Your balance and collection are saved
+          in this browser only (they won't follow you to a different device or browser).
+        </p>
+      </div>
+      <div class="score-tile" style="max-width:220px; margin:0 auto 20px;">
+        <div class="num">$${window.OAWallet.getBalance()}</div>
+        <div class="label">Your balance</div>
+      </div>
+      <div class="shop-grid" id="shop-grid"></div>
+      <div class="card" style="margin-top:24px;">
+        <h3 style="margin-top:0;">Your collection</h3>
+        <div class="owned-shelf" id="owned-shelf"></div>
+      </div>
+      <div class="center" style="margin-top:20px;">
+        <button class="btn secondary" id="shop-home-btn">Back to Home</button>
+      </div>
+    `;
+    renderShopGrid();
+    renderOwnedShelf();
+    root.querySelector("#shop-home-btn").addEventListener("click", () => showScreen("home"));
   }
 
   function showPowerDay() {
@@ -300,6 +455,9 @@
   document.getElementById("start-btn").addEventListener("click", startSituational);
   document.getElementById("finish-coding-btn").addEventListener("click", finishCoding);
   document.getElementById("view-powerday-btn").addEventListener("click", showPowerDay);
+  document.getElementById("view-shop-btn").addEventListener("click", showShop);
+  walletBadge.addEventListener("click", showShop);
 
+  updateWalletBadge();
   showScreen("home");
 })();
