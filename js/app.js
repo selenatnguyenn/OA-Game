@@ -4,6 +4,9 @@
 
 (function () {
   const CODING_SECONDS = 70 * 60;
+  // Edit this to your own application deadline, or remove the banner call
+  // below if you'd rather not show one.
+  const DEADLINE_DATE = "2026-10-02";
 
   function freshState() {
     window.buildSituationalSet();
@@ -47,6 +50,7 @@
     behavioral: document.getElementById("screen-behavioral"),
     behavioralReview: document.getElementById("screen-behavioral-review"),
     shop: document.getElementById("screen-shop"),
+    goals: document.getElementById("screen-goals"),
   };
   const timerPill = document.getElementById("global-timer");
   const walletBadge = document.getElementById("wallet-badge");
@@ -54,6 +58,47 @@
 
   function updateWalletBadge() {
     walletAmountEl.textContent = "$" + window.OAWallet.getBalance();
+  }
+
+  function updateGoalsSummaryHome() {
+    const el = document.getElementById("goals-summary-home");
+    if (!el) return;
+    const goals = window.OAGoals.getAll();
+    const doneCount = goals.filter((g) => g.done).length;
+    el.textContent = `${doneCount}/${goals.length} complete — each pays a one-time OA Bucks bonus.`;
+  }
+
+  function renderDateBanner() {
+    const el = document.getElementById("date-banner");
+    if (!el) return;
+    const now = new Date();
+    const deadline = new Date(DEADLINE_DATE + "T23:59:59");
+    const todayStr = now.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+    const daysLeft = Math.ceil((deadline - now) / 86400000);
+    let deadlineText;
+    if (daysLeft > 1) deadlineText = `⏳ ${daysLeft} days left until the assessment deadline`;
+    else if (daysLeft === 1) deadlineText = `⏳ 1 day left — the deadline is tomorrow!`;
+    else if (daysLeft === 0) deadlineText = `⏳ The deadline is today!`;
+    else deadlineText = `The assessment deadline has passed.`;
+    el.innerHTML = `📅 Today is ${todayStr} · ${deadlineText}`;
+    el.classList.toggle("urgent", daysLeft <= 3 && daysLeft >= 0);
+  }
+
+  // Awards any goals that just became true and returns the total OA Bucks
+  // bonus paid out (0 if none). Call after any state change that could
+  // complete a goal (a run, a purchase, a behavioral practice).
+  function awardNewlyCompletedGoals() {
+    const newly = window.OAGoals.checkNewlyCompleted();
+    const bonus = newly.reduce((sum, g) => sum + g.reward, 0);
+    if (bonus > 0) window.OAWallet.earn(bonus);
+    updateGoalsSummaryHome();
+    return { newly, bonus };
+  }
+
+  function goalUnlockedHtml(newly) {
+    if (!newly.length) return "";
+    const items = newly.map((g) => `${g.title} (+$${g.reward})`).join(", ");
+    return `<div class="verdict strong" style="margin-top:10px;">🎉 New goal${newly.length > 1 ? "s" : ""} unlocked: ${items}</div>`;
   }
 
   function showScreen(name) {
@@ -170,6 +215,7 @@
     // speed bonus. Situational dollars are only ever paid out once per OA
     // session (the round isn't timed/re-run the way coding is), so revisiting
     // results via a Power Day "redo coding" pass doesn't double-pay them.
+    const isFirstCompletionThisSession = !state.situational.rewardClaimed;
     const sjSolvedCount = sj.detail.filter((d) => d.mostCorrect && d.leastCorrect).length;
     const sjDollarsThisTime = state.situational.rewardClaimed ? 0 : sjSolvedCount;
     state.situational.rewardClaimed = true;
@@ -188,6 +234,10 @@
 
     const totalEarned = sjDollarsThisTime + codingSolvedCount + timeBonus;
     window.OAWallet.earn(totalEarned);
+
+    window.OAGoals.recordRun(sjPct, codingPct, isFirstCompletionThisSession);
+    const { newly: newlyGoals } = awardNewlyCompletedGoals();
+
     updateWalletBadge();
     const newBalance = window.OAWallet.getBalance();
 
@@ -221,11 +271,13 @@
         <div class="verdict strong" style="margin-bottom:0;">
           +$${totalEarned} earned this run · new balance: $${newBalance}
         </div>
+        ${goalUnlockedHtml(newlyGoals)}
       </div>
 
       <div class="center" style="margin-top:28px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
         <button class="btn" id="powerday-btn">What's Next: Power Day Prep →</button>
         <button class="btn secondary" id="shop-btn-results">Visit Reward Shop</button>
+        <button class="btn secondary" id="goals-btn-results">View Goals</button>
         <button class="btn secondary" id="restart-btn">Restart Practice OA</button>
       </div>
     `;
@@ -269,6 +321,7 @@
 
     root.querySelector("#powerday-btn").addEventListener("click", showPowerDay);
     root.querySelector("#shop-btn-results").addEventListener("click", showShop);
+    root.querySelector("#goals-btn-results").addEventListener("click", showGoals);
     root.querySelector("#restart-btn").addEventListener("click", () => {
       state = freshState();
       showScreen("home");
@@ -315,6 +368,7 @@
       btn.addEventListener("click", () => {
         const item = window.SHOP_ITEMS.find((i) => i.id === btn.getAttribute("data-buy"));
         if (item && window.OAWallet.buy(item.id, item.cost)) {
+          awardNewlyCompletedGoals();
           updateWalletBadge();
           renderShopGrid();
           renderOwnedShelf();
@@ -349,6 +403,43 @@
     renderShopGrid();
     renderOwnedShelf();
     root.querySelector("#shop-home-btn").addEventListener("click", () => showScreen("home"));
+  }
+
+  function showGoals() {
+    showScreen("goals");
+    const root = screens.goals.querySelector(".goals-body");
+    const goals = window.OAGoals.getAll();
+    const doneCount = goals.filter((g) => g.done).length;
+    const pct = Math.round((doneCount / goals.length) * 100);
+    root.innerHTML = `
+      <div class="card">
+        <p style="color:var(--text-dim); margin:0 0 4px;">
+          ${doneCount}/${goals.length} goals complete — each pays a one-time OA Bucks bonus the
+          moment you hit it. Progress is saved in this browser and carries across practice runs.
+        </p>
+        <div class="goals-progress"><div class="goals-progress-fill" style="width:${pct}%;"></div></div>
+      </div>
+      <div class="goals-grid">
+        ${goals
+          .map(
+            (g) => `
+          <div class="goal-card ${g.done ? "done" : ""}">
+            <div class="goal-top">
+              <span class="goal-title">${g.title}</span>
+              <span class="goal-reward">$${g.reward}</span>
+            </div>
+            <div class="goal-desc">${g.desc}</div>
+            <div class="goal-check">${g.done ? "✓ Complete" : ""}</div>
+          </div>
+        `
+          )
+          .join("")}
+      </div>
+      <div class="center" style="margin-top:20px;">
+        <button class="btn secondary" id="goals-home-btn">Back to Home</button>
+      </div>
+    `;
+    root.querySelector("#goals-home-btn").addEventListener("click", () => showScreen("home"));
   }
 
   function showPowerDay() {
@@ -421,9 +512,15 @@
   function showBehavioralReview() {
     window.OABehavioral.clearTimer(state);
     showScreen("behavioralReview");
+
+    window.OAGoals.markBehavioralTried();
+    const { newly: newlyGoals } = awardNewlyCompletedGoals();
+    updateWalletBadge();
+
     const root = screens.behavioralReview.querySelector(".behavioral-review-body");
     root.innerHTML = `
       <p style="color: var(--text-dim);">Self-grade each answer against the STAR framework — this is not auto-scored.</p>
+      ${goalUnlockedHtml(newlyGoals)}
       <div id="behavioral-breakdown"></div>
       <div class="center" style="margin-top:24px;">
         <button class="btn" id="back-to-powerday-btn">Back to Power Day Prep</button>
@@ -456,8 +553,11 @@
   document.getElementById("finish-coding-btn").addEventListener("click", finishCoding);
   document.getElementById("view-powerday-btn").addEventListener("click", showPowerDay);
   document.getElementById("view-shop-btn").addEventListener("click", showShop);
+  document.getElementById("view-goals-btn").addEventListener("click", showGoals);
   walletBadge.addEventListener("click", showShop);
 
   updateWalletBadge();
+  updateGoalsSummaryHome();
+  renderDateBanner();
   showScreen("home");
 })();

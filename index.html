@@ -39,6 +39,8 @@
       <button class="btn" id="start-btn">Start Practice OA</button>
     </div>
 
+    <div class="tip-box" id="date-banner" style="margin-bottom:18px;"></div>
+
     <div class="grid-2">
       <div class="card">
         <h3>Round 1 · Situational Judgment (untimed)</h3>
@@ -78,6 +80,16 @@
           </p>
         </div>
         <button class="btn secondary" id="view-shop-btn">Visit Reward Shop</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div>
+          <h3 style="margin-bottom:4px;">🎯 Your Goals</h3>
+          <p style="color:var(--text-dim); margin:0;" id="goals-summary-home">Loading…</p>
+        </div>
+        <button class="btn secondary" id="view-goals-btn">View Goals</button>
       </div>
     </div>
 
@@ -145,6 +157,13 @@
     <div class="shop-body"></div>
   </section>
 
+  <section class="screen" id="screen-goals">
+    <div class="hero" style="padding-top:0;">
+      <h1>Your Goals</h1>
+    </div>
+    <div class="goals-body"></div>
+  </section>
+
 </main>
 
 <footer class="note">
@@ -156,6 +175,7 @@
 <script src="data/situational.js"></script>
 <script src="data/shop.js"></script>
 <script src="js/wallet.js"></script>
+<script src="js/goals.js"></script>
 <script src="js/runner.js"></script>
 <script src="js/coding.js"></script>
 <script src="js/behavioralUI.js"></script>

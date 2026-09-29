@@ -65,6 +65,12 @@ python3 -m http.server 8000
   the Reward Shop. Balance and collection persist in `localStorage`, so they
   carry over between practice runs in the same browser — nothing here affects
   your actual score.
+- **Goals.** Six achievement-style goals (first run, strong situational score,
+  strong coding score, a Power Day behavioral practice, collecting 3 shop
+  items, 3 full practice runs) that each pay a one-time OA Bucks bonus the
+  moment you hit them. Progress persists in `localStorage`.
+- **Date & deadline banner.** Shows today's date and a live countdown to an
+  editable application deadline on the home screen.
 
 ## Why it's built this way (sources)
 
