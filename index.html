@@ -25,16 +25,26 @@
     <div class="hero">
       <h1>Practice Online Assessment</h1>
       <p class="lead">
-        A self-contained simulation of the two-part OA format that candidates commonly report for
-        Capital One's Technology Development Program: a timed coding round (bank/business-flavored
-        problems, no whiteboard graph theory or DP) followed by a HireVue-style timed behavioral round.
+        A self-contained simulation of the pipeline candidates report for Capital One's Technology
+        Development Program: an untimed <strong>Virtual Job Tryout</strong>-style situational judgment
+        round, then a timed <strong>CodeSignal</strong>-style coding round. Pass both, and there's a
+        Power Day loop after — this tool includes prep for that too.
       </p>
       <button class="btn" id="start-btn">Start Practice OA</button>
     </div>
 
     <div class="grid-2">
       <div class="card">
-        <h3>Round 1 · Coding (70 minutes)</h3>
+        <h3>Round 1 · Situational Judgment (untimed)</h3>
+        <ul class="tight">
+          <li>8 original work scenarios, multiple choice.</li>
+          <li>For each, pick the <strong>Most</strong> and <strong>Least</strong> effective response — the common "SJT" format.</li>
+          <li>Tests judgment/work-style (ownership, integrity, customer focus, adaptability), not code.</li>
+          <li>Matches the "Virtual Job Tryout" step Capital One's real OA invite describes.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Round 2 · Coding (70 minutes)</h3>
         <ul class="tight">
           <li>4 questions: Easy, Easy, Medium, Hard — 100 points total.</li>
           <li>Bank/business-flavored string, simulation, and state-machine problems.</li>
@@ -42,14 +52,15 @@
           <li>No dynamic programming or advanced graph theory — read carefully, model the state.</li>
         </ul>
       </div>
-      <div class="card">
-        <h3>Round 2 · Behavioral (HireVue-style)</h3>
-        <ul class="tight">
-          <li>30 seconds of prep time per question, then a timed typed response (stand-in for a recorded answer).</li>
-          <li>6 STAR-format behavioral questions + 4 motivation / mini-case questions.</li>
-          <li>Use the STAR framework: Situation, Task, Action, Result — and speak in "I", not "we".</li>
-          <li>Self-graded at the end against a STAR checklist.</li>
-        </ul>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div>
+          <h3 style="margin-bottom:4px;">Made it past the OA? There's a Power Day next.</h3>
+          <p style="color:var(--text-dim); margin:0;">Preview and practice the onsite loop: 1 behavioral interview + 2 coding interviews + 1 case interview.</p>
+        </div>
+        <button class="btn secondary" id="view-powerday-btn">View Power Day Prep</button>
       </div>
     </div>
 
@@ -57,29 +68,47 @@
       <h3>How this was built</h3>
       <p style="color: var(--text-dim); margin-bottom: 0;">
         Format and difficulty pattern based on candidate reports aggregated from Reddit / Blind (teamblind.com)
-        threads and interview-prep write-ups describing Capital One's CodeSignal OA and HireVue behavioral
-        round. See <code>README.md</code> in this repo for sources and caveats — treat this as directional
-        practice, not a guarantee of the real assessment's exact content.
+        threads and interview-prep write-ups describing Capital One's CodeSignal OA, Virtual Job Tryout, and
+        Power Day onsite loop. See <code>README.md</code> in this repo for sources and caveats — treat this as
+        directional practice, not a guarantee of the real assessment's exact content.
       </p>
     </div>
   </section>
 
+  <section class="screen" id="screen-situational">
+    <div class="situational-body"></div>
+  </section>
+
   <section class="screen" id="screen-coding">
     <div class="actions-row" style="justify-content: flex-end;">
-      <button class="btn secondary" id="finish-coding-btn">Finish Coding &amp; Continue to Behavioral →</button>
+      <button class="btn secondary" id="finish-coding-btn">Finish Coding &amp; See OA Results →</button>
     </div>
     <div class="coding-body"></div>
+  </section>
+
+  <section class="screen" id="screen-results">
+    <div class="hero" style="padding-top:0;">
+      <h1>OA Results</h1>
+    </div>
+    <div class="results-body"></div>
+  </section>
+
+  <section class="screen" id="screen-powerday">
+    <div class="hero" style="padding-top:0;">
+      <h1>Power Day Prep</h1>
+    </div>
+    <div class="powerday-body"></div>
   </section>
 
   <section class="screen" id="screen-behavioral">
     <div class="behavioral-body"></div>
   </section>
 
-  <section class="screen" id="screen-results">
+  <section class="screen" id="screen-behavioral-review">
     <div class="hero" style="padding-top:0;">
-      <h1>Results</h1>
+      <h1>Behavioral Practice Review</h1>
     </div>
-    <div class="results-body"></div>
+    <div class="behavioral-review-body"></div>
   </section>
 
 </main>
@@ -90,9 +119,11 @@
 
 <script src="data/problems.js"></script>
 <script src="data/behavioral.js"></script>
+<script src="data/situational.js"></script>
 <script src="js/runner.js"></script>
 <script src="js/coding.js"></script>
 <script src="js/behavioralUI.js"></script>
+<script src="js/situationalUI.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

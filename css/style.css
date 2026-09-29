@@ -301,6 +301,46 @@ textarea.answer-box:disabled { opacity: 0.5; }
   color: var(--text-dim);
 }
 
+/* SITUATIONAL JUDGMENT */
+.sjt-table {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 8px;
+}
+.sjt-header {
+  display: grid;
+  grid-template-columns: 1fr 110px 110px;
+  gap: 10px;
+  padding: 0 14px 8px;
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+.sjt-header span:first-child { text-align: left; }
+.sjt-row {
+  display: grid;
+  grid-template-columns: 1fr 110px 110px;
+  gap: 10px;
+  align-items: center;
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+.sjt-text { font-size: 0.92rem; line-height: 1.4; }
+.sjt-radio { text-align: center; }
+.sjt-radio input { width: 18px; height: 18px; cursor: pointer; }
+@media (max-width: 640px) {
+  .sjt-header, .sjt-row { grid-template-columns: 1fr 70px 70px; gap: 6px; }
+  .sjt-text { font-size: 0.85rem; }
+}
+
+.sj-correct { color: var(--pass); font-weight: 600; }
+.sj-incorrect { color: var(--fail); font-weight: 600; }
+
 .progress-dots {
   display: flex;
   gap: 6px;
