@@ -271,3 +271,241 @@ return results;`,
     ],
   },
 ];
+
+/* Alternate problems, one per difficulty slot, so repeated practice runs
+   don't always show the exact same four questions. window.buildProblemSet()
+   picks one variant per slot at random and mutates window.PROBLEMS in place
+   (same array reference other modules already captured). */
+
+const p1_alt = {
+  id: "p1-alt",
+  title: "Round-Up Savings Tracker",
+  difficulty: "Easy",
+  points: 15,
+  entryName: "roundUpSavings",
+  prompt: `
+    <p>A "round-up savings" feature rounds every purchase up to the next
+    whole dollar and sweeps the difference into savings. Write
+    <code>roundUpSavings(purchases)</code>, where <code>purchases</code> is
+    an array of positive integer purchase amounts in <strong>cents</strong>.</p>
+    <p>For each purchase, compute the round-up: if the purchase is already an
+    exact whole-dollar amount, the round-up is <code>0</code>; otherwise it's
+    the amount needed to reach the next dollar. Return
+    <code>{ totalSaved, purchaseCount }</code>, where <code>totalSaved</code>
+    is the sum of all round-ups (in cents) and <code>purchaseCount</code> is
+    how many purchases had a nonzero round-up.</p>
+    <p><strong>Example:</strong><br>
+    <code>roundUpSavings([250, 999, 100])</code> →
+    <code>{ totalSaved: 51, purchaseCount: 2 }</code>
+    (250¢ rounds up 50¢, 999¢ rounds up 1¢, 100¢ needs no round-up)</p>
+  `,
+  starterCode:
+`function roundUpSavings(purchases) {
+  // purchases: number[] of positive integer cents
+  // return { totalSaved: number, purchaseCount: number }
+
+}`,
+  callTemplate: "return roundUpSavings(__INPUT__);",
+  tests: [
+    { input: [250, 999, 100], expected: { totalSaved: 51, purchaseCount: 2 }, hidden: false },
+    { input: [], expected: { totalSaved: 0, purchaseCount: 0 }, hidden: false },
+    { input: [100, 200, 300], expected: { totalSaved: 0, purchaseCount: 0 }, hidden: true },
+    { input: [1, 2, 3], expected: { totalSaved: 294, purchaseCount: 3 }, hidden: true },
+  ],
+};
+
+const p2_alt = {
+  id: "p2-alt",
+  title: "Masked Account Number",
+  difficulty: "Easy",
+  points: 20,
+  entryName: "maskAccountNumber",
+  prompt: `
+    <p>Write <code>maskAccountNumber(number)</code>, where
+    <code>number</code> is a string of digits at least 4 characters long.
+    Mask every digit except the <strong>last 4</strong> with the bullet
+    character <code>•</code>, then split the resulting string into groups of
+    4 characters counting from the <strong>left</strong> (the last group may
+    be shorter than 4), and join the groups with single spaces.</p>
+    <p><strong>Examples:</strong><br>
+    <code>maskAccountNumber("4111111111111234")</code> →
+    <code>"•••• •••• •••• 1234"</code><br>
+    <code>maskAccountNumber("12345678")</code> → <code>"•••• 5678"</code><br>
+    <code>maskAccountNumber("0000")</code> → <code>"0000"</code>
+    (nothing to mask when the string is only 4 characters)</p>
+  `,
+  starterCode:
+`function maskAccountNumber(number) {
+  // return the masked, grouped string described above
+
+}`,
+  callTemplate: "return maskAccountNumber(__INPUT__);",
+  tests: [
+    { input: "4111111111111234", expected: "•••• •••• •••• 1234", hidden: false },
+    { input: "12345678", expected: "•••• 5678", hidden: false },
+    { input: "1234567890", expected: "•••• ••78 90", hidden: true },
+    { input: "0000", expected: "0000", hidden: true },
+  ],
+};
+
+const p3_alt = {
+  id: "p3-alt",
+  title: "Multi-Currency Wallet",
+  difficulty: "Medium",
+  points: 30,
+  entryName: "Wallet",
+  prompt: `
+    <p>Implement a class <code>Wallet</code> that holds balances in multiple
+    currencies.</p>
+    <pre>class Wallet {
+  constructor(balances, rates)
+    // rates: { USD: 1, EUR: 1.1, ... } — value of 1 unit of that currency in USD.
+    // A currency is "supported" if it has a key in rates.
+    // balances: starting balance (in cents) per supported currency; missing
+    // currencies default to 0.
+  deposit(currency, amount)   // amount in cents; returns new balance, or
+                              // false if currency unsupported or amount <= 0
+  withdraw(currency, amount)  // returns new balance, or false if unsupported,
+                              // amount <= 0, or insufficient funds
+  convert(from, to, amount)   // moves 'amount' cents out of 'from' into 'to'
+                              // at the exchange rate, rounding the converted
+                              // amount down (Math.floor). Returns the amount
+                              // credited to 'to', or false if either currency
+                              // is unsupported, amount <= 0, or insufficient
+                              // funds in 'from'. No balances change on false.
+}</pre>
+    <p><strong>Example:</strong> with rates
+    <code>{ USD: 1, EUR: 1.1 }</code>, converting 1000 cents from USD to EUR
+    credits <code>Math.floor(1000 * 1 / 1.1) = 909</code> cents to EUR.</p>
+  `,
+  starterCode:
+`class Wallet {
+  constructor(balances, rates) {
+
+  }
+  deposit(currency, amount) {
+
+  }
+  withdraw(currency, amount) {
+
+  }
+  convert(from, to, amount) {
+
+  }
+}`,
+  callTemplate:
+`const __input = __INPUT__;
+const wallet = new Wallet(__input.balances, __input.rates);
+const results = [];
+for (const op of __input.ops) {
+  if (op.type === 'deposit') results.push(wallet.deposit(op.currency, op.amount));
+  else if (op.type === 'withdraw') results.push(wallet.withdraw(op.currency, op.amount));
+  else if (op.type === 'convert') results.push(wallet.convert(op.from, op.to, op.amount));
+}
+return results;`,
+  tests: [
+    {
+      input: {
+        balances: { USD: 1000, EUR: 500, GBP: 0 },
+        rates: { USD: 1, EUR: 1.1, GBP: 1.25 },
+        ops: [
+          { type: "deposit", currency: "USD", amount: 200 },
+          { type: "withdraw", currency: "EUR", amount: 600 },
+          { type: "convert", from: "USD", to: "EUR", amount: 1000 },
+          { type: "convert", from: "GBP", to: "USD", amount: 100 },
+          { type: "deposit", currency: "JPY", amount: 100 },
+          { type: "withdraw", currency: "USD", amount: -5 },
+        ],
+      },
+      expected: [1200, false, 909, false, false, false],
+      hidden: false,
+    },
+    {
+      input: {
+        balances: { USD: 0, EUR: 500, GBP: 0 },
+        rates: { USD: 1, EUR: 1.1, GBP: 1.25 },
+        ops: [{ type: "convert", from: "EUR", to: "GBP", amount: 500 }],
+      },
+      expected: [440],
+      hidden: true,
+    },
+  ],
+};
+
+const p4_alt = {
+  id: "p4-alt",
+  title: "Loan Application State Machine",
+  difficulty: "Hard",
+  points: 35,
+  entryName: "runLoanMachine",
+  prompt: `
+    <p>Model a loan application as a state machine and write
+    <code>runLoanMachine(events)</code>, where <code>events</code> is an
+    array of event name strings. Return an array with one result string per
+    event.</p>
+    <p><strong>States:</strong> <code>DRAFT</code> → <code>SUBMITTED</code> →
+    <code>UNDER_REVIEW</code> → (<code>APPROVED</code> | <code>REJECTED</code>
+    | <code>INFO_REQUESTED</code>), where <code>INFO_REQUESTED</code> returns
+    to <code>UNDER_REVIEW</code>. <code>APPROVED</code> and
+    <code>REJECTED</code> are terminal.</p>
+    <p><strong>Events</strong> (starting state is <code>DRAFT</code>):</p>
+    <ul>
+      <li><code>"submit"</code> — valid only in <code>DRAFT</code>; moves to
+      <code>SUBMITTED</code>, emits <code>"SUBMITTED"</code>. Otherwise emits
+      <code>"INVALID_SUBMIT"</code>.</li>
+      <li><code>"startReview"</code> — valid only in <code>SUBMITTED</code>;
+      moves to <code>UNDER_REVIEW</code>, emits <code>"UNDER_REVIEW"</code>.
+      Otherwise emits <code>"INVALID_ACTION"</code>.</li>
+      <li><code>"requestInfo"</code> — valid only in
+      <code>UNDER_REVIEW</code>; moves to <code>INFO_REQUESTED</code>, emits
+      <code>"INFO_REQUESTED"</code>. Otherwise <code>"INVALID_ACTION"</code>.</li>
+      <li><code>"respond"</code> — valid only in
+      <code>INFO_REQUESTED</code>; moves back to <code>UNDER_REVIEW</code>,
+      emits <code>"UNDER_REVIEW"</code>. Otherwise
+      <code>"INVALID_ACTION"</code>.</li>
+      <li><code>"approve"</code> / <code>"reject"</code> — valid only in
+      <code>UNDER_REVIEW</code>; move to <code>APPROVED</code> /
+      <code>REJECTED</code> and emit the same word. Otherwise
+      <code>"INVALID_ACTION"</code>.</li>
+    </ul>
+    <p>Once <code>APPROVED</code> or <code>REJECTED</code>, every subsequent
+    event emits <code>"APPLICATION_CLOSED"</code> forever.</p>
+  `,
+  starterCode:
+`function runLoanMachine(events) {
+  // events: string[] — see the event list above
+  // return an array of result strings, one per event
+
+}`,
+  callTemplate: "return runLoanMachine(__INPUT__);",
+  tests: [
+    {
+      input: ["submit", "startReview", "requestInfo", "respond", "approve"],
+      expected: ["SUBMITTED", "UNDER_REVIEW", "INFO_REQUESTED", "UNDER_REVIEW", "APPROVED"],
+      hidden: false,
+    },
+    {
+      input: ["startReview", "submit", "submit"],
+      expected: ["INVALID_ACTION", "SUBMITTED", "INVALID_SUBMIT"],
+      hidden: false,
+    },
+    {
+      input: ["submit", "startReview", "reject", "approve", "submit"],
+      expected: ["SUBMITTED", "UNDER_REVIEW", "REJECTED", "APPLICATION_CLOSED", "APPLICATION_CLOSED"],
+      hidden: true,
+    },
+  ],
+};
+
+window.PROBLEM_SLOTS = [
+  [window.PROBLEMS[0], p1_alt],
+  [window.PROBLEMS[1], p2_alt],
+  [window.PROBLEMS[2], p3_alt],
+  [window.PROBLEMS[3], p4_alt],
+];
+
+window.buildProblemSet = function () {
+  const picked = window.PROBLEM_SLOTS.map((slot) => slot[Math.floor(Math.random() * slot.length)]);
+  window.PROBLEMS.length = 0;
+  window.PROBLEMS.push(...picked);
+};

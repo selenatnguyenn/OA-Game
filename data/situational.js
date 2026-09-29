@@ -7,9 +7,14 @@
    Format: each scenario gives 4 possible responses. You pick the response
    you think is MOST effective and the one you think is LEAST effective —
    the same two-choice format real SJTs commonly use instead of a single
-   "right answer." Original scenarios; not real Capital One questions. */
+   "right answer." Original scenarios; not real Capital One questions.
 
-window.SITUATIONAL = [
+   The pool below has more scenarios than any one session shows —
+   window.buildSituationalSet() randomly picks and shuffles a subset into
+   window.SITUATIONAL so repeated practice runs don't always show the same
+   8 questions in the same order. */
+
+window.SITUATIONAL_POOL = [
   {
     id: "sj1",
     competency: "Prioritization & Ownership",
@@ -106,4 +111,65 @@ window.SITUATIONAL = [
       { id: "d", text: "Silently make the changes without engaging or asking any follow-up questions.", rank: 2 },
     ],
   },
+  {
+    id: "sj9",
+    competency: "Time Management",
+    scenario:
+      "You realize two days before a deadline that your original estimate was off, and you won't finish everything you committed to.",
+    options: [
+      { id: "a", text: "Keep quiet and work overtime alone, trying to finish everything without telling anyone.", rank: 3 },
+      { id: "b", text: "Tell your manager right away, explain what's at risk, and propose which pieces to prioritize or what could slip.", rank: 1 },
+      { id: "c", text: "Quietly drop some of the requirements without telling anyone, hoping it goes unnoticed.", rank: 4 },
+      { id: "d", text: "Hand the whole task off to a teammate at the last minute without much context.", rank: 2 },
+    ],
+  },
+  {
+    id: "sj10",
+    competency: "Cross-Team Collaboration",
+    scenario:
+      "You notice another team's upcoming change is about to break an API your service depends on, and they don't seem aware of the impact on you.",
+    options: [
+      { id: "a", text: "Reach out to them directly and proactively, explain the dependency, and work out a plan together.", rank: 1 },
+      { id: "b", text: "Wait to see if it actually breaks before saying anything.", rank: 4 },
+      { id: "c", text: "Escalate straight to both managers without first talking to the other team.", rank: 3 },
+      { id: "d", text: "Post a general warning in a wide company channel without directly contacting the team making the change.", rank: 2 },
+    ],
+  },
+  {
+    id: "sj11",
+    competency: "Handling Ambiguity",
+    scenario:
+      "You're assigned a project with a vague goal and no clear success criteria, and your manager is out for the week.",
+    options: [
+      { id: "a", text: "Make reasonable assumptions, document them clearly, and start moving forward while flagging what you assumed.", rank: 1 },
+      { id: "b", text: "Wait until your manager is back before doing anything.", rank: 4 },
+      { id: "c", text: "Guess quietly and proceed without writing down or sharing your assumptions.", rank: 3 },
+      { id: "d", text: "Ask a teammate for a detailed spec they don't actually have, and wait for them to produce one.", rank: 2 },
+    ],
+  },
+  {
+    id: "sj12",
+    competency: "Confidentiality",
+    scenario:
+      "A friend who works at a different company casually asks you general questions about how your bank's fraud-detection systems work, out of curiosity.",
+    options: [
+      { id: "a", text: "Politely decline to discuss internal system details and explain you can't share that.", rank: 1 },
+      { id: "b", text: "Share only \"high level, obviously public\" details since it seems harmless.", rank: 2 },
+      { id: "c", text: "Share a fair amount of detail since your friend isn't a competitor and it's just curiosity.", rank: 3 },
+      { id: "d", text: "Share full detail since it's an interesting technical problem worth discussing.", rank: 4 },
+    ],
+  },
 ];
+
+window.SITUATIONAL = window.SITUATIONAL_POOL.slice(0, 8);
+
+window.buildSituationalSet = function () {
+  const pool = window.SITUATIONAL_POOL.slice();
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  const picked = pool.slice(0, 8);
+  window.SITUATIONAL.length = 0;
+  window.SITUATIONAL.push(...picked);
+};

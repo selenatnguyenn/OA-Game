@@ -6,6 +6,9 @@
   const CODING_SECONDS = 70 * 60;
 
   function freshState() {
+    window.buildSituationalSet();
+    window.buildProblemSet();
+    window.buildBehavioralSet();
     return {
       screen: "home",
       situational: {
@@ -83,6 +86,7 @@
       state.coding.timeLeftSec -= 1;
       timerPill.textContent = fmtClock(state.coding.timeLeftSec);
       timerPill.classList.toggle("low", state.coding.timeLeftSec <= 300);
+      timerPill.classList.toggle("critical", state.coding.timeLeftSec <= 60);
       if (state.coding.timeLeftSec <= 0) {
         clearCodingTimer();
         finishCoding();
