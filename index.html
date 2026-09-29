@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TDP Practice OA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Press+Start+2P&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div class="disclaimer">
+  Unofficial fan-made practice tool — not affiliated with, endorsed by, or sourced from Capital One.
+  Problems and question style are original, written to match publicly-discussed formats from Reddit/Blind
+  candidate reports (see README). They are not real exam questions.
+</div>
+
+<header class="topbar">
+  <div class="brand">TDP <span>Practice</span> OA</div>
+  <div style="display:flex; align-items:center; gap:10px;">
+    <span class="timer-pill" id="global-timer" style="display:none;"></span>
+    <button class="wallet-badge" id="wallet-badge" title="Visit the Reward Shop">💰 <span id="wallet-amount">$0</span></button>
+  </div>
+</header>
+
+<main>
+
+  <section class="screen active" id="screen-home">
+    <div class="hero">
+      <h1>Practice Online Assessment</h1>
+      <p class="lead">
+        A self-contained simulation of the pipeline candidates report for Capital One's Technology
+        Development Program: an untimed <strong>Virtual Job Tryout</strong>-style situational judgment
+        round, then a timed <strong>CodeSignal</strong>-style coding round. Pass both, and there's a
+        Power Day loop after — this tool includes prep for that too.
+      </p>
+      <button class="btn" id="start-btn">Start Practice OA</button>
+    </div>
+
+    <div id="onboarding-card" style="margin-bottom:18px;"></div>
+
+    <div class="tip-box" id="date-banner" style="margin-bottom:18px;"></div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Round 1 · Situational Judgment (untimed)</h3>
+        <ul class="tight">
+          <li>8 original work scenarios, multiple choice.</li>
+          <li>For each, pick the <strong>Most</strong> and <strong>Least</strong> effective response — the common "SJT" format.</li>
+          <li>Tests judgment/work-style (ownership, integrity, customer focus, adaptability), not code.</li>
+          <li>Matches the "Virtual Job Tryout" step Capital One's real OA invite describes.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Round 2 · Coding (70 minutes)</h3>
+        <ul class="tight">
+          <li>4 questions: Easy, Easy, Medium, Hard — 100 points total.</li>
+          <li>Bank/business-flavored string, simulation, and state-machine problems.</li>
+          <li>Code runs against visible <em>and</em> hidden test cases in a sandboxed Web Worker.</li>
+          <li>No dynamic programming or advanced graph theory — read carefully, model the state.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tip-box" style="margin: -6px 0 18px;">
+      Each practice run pulls a fresh mix — the 8 situational scenarios, one problem per coding
+      difficulty, and the 10 behavioral questions are all randomly picked and shuffled from a
+      larger pool, so repeated runs don't just repeat the same set.
+    </div>
+
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div>
+          <h3 style="margin-bottom:4px;">💰 Earn up to $60 as you go</h3>
+          <p style="color:var(--text-dim); margin:0;">
+            $3 for every situational scenario you nail (both Most and Least correct), $4–$8 for
+            every coding problem you fully solve (harder problems pay more), up to an $8 speed
+            bonus for finishing coding with time to spare, and $4 for completing a Power Day
+            behavioral practice — up to $60 total. Balance carries over between runs in this
+            browser — spend it on cute, purely cosmetic rewards.
+          </p>
+        </div>
+        <button class="btn secondary" id="view-shop-btn">Visit Reward Shop</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div>
+          <h3 style="margin-bottom:4px;">🎯 Your Goals</h3>
+          <p style="color:var(--text-dim); margin:0;" id="goals-summary-home">Loading…</p>
+        </div>
+        <button class="btn secondary" id="view-goals-btn">View Goals</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div>
+          <h3 style="margin-bottom:4px;">Made it past the OA? There's a Power Day next.</h3>
+          <p style="color:var(--text-dim); margin:0;">Preview and practice the onsite loop: 1 behavioral interview + 2 coding interviews + 1 case interview.</p>
+        </div>
+        <button class="btn secondary" id="view-powerday-btn">View Power Day Prep</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>How this was built</h3>
+      <p style="color: var(--text-dim); margin-bottom: 0;">
+        Format and difficulty pattern based on candidate reports aggregated from Reddit / Blind (teamblind.com)
+        threads and interview-prep write-ups describing Capital One's CodeSignal OA, Virtual Job Tryout, and
+        Power Day onsite loop. See <code>README.md</code> in this repo for sources and caveats — treat this as
+        directional practice, not a guarantee of the real assessment's exact content.
+      </p>
+    </div>
+  </section>
+
+  <section class="screen" id="screen-situational">
+    <div class="situational-body"></div>
+  </section>
+
+  <section class="screen" id="screen-coding">
+    <div class="actions-row" style="justify-content: flex-end;">
+      <button class="btn secondary" id="finish-coding-btn">Finish Coding &amp; See OA Results →</button>
+    </div>
+    <div class="coding-body"></div>
+  </section>
+
+  <section class="screen" id="screen-results">
+    <div class="hero" style="padding-top:0;">
+      <h1>OA Results</h1>
+    </div>
+    <div class="results-body"></div>
+  </section>
+
+  <section class="screen" id="screen-powerday">
+    <div class="hero" style="padding-top:0;">
+      <h1>Power Day Prep</h1>
+    </div>
+    <div class="powerday-body"></div>
+  </section>
+
+  <section class="screen" id="screen-behavioral">
+    <div class="behavioral-body"></div>
+  </section>
+
+  <section class="screen" id="screen-behavioral-review">
+    <div class="hero" style="padding-top:0;">
+      <h1>Behavioral Practice Review</h1>
+    </div>
+    <div class="behavioral-review-body"></div>
+  </section>
+
+  <section class="screen" id="screen-shop">
+    <div class="hero" style="padding-top:0;">
+      <h1>Reward Shop</h1>
+    </div>
+    <div class="shop-body"></div>
+  </section>
+
+  <section class="screen" id="screen-goals">
+    <div class="hero" style="padding-top:0;">
+      <h1>Your Goals</h1>
+    </div>
+    <div class="goals-body"></div>
+  </section>
+
+  <section class="screen" id="screen-skillcheck-results">
+    <div class="hero" style="padding-top:0;">
+      <h1>Skill Check Results</h1>
+    </div>
+    <div class="skillcheck-results-body"></div>
+  </section>
+
+</main>
+
+<footer class="note">
+  Runs entirely in your browser — no code or answers are sent anywhere. Open <code>README.md</code> for details and sources.
+</footer>
+
+<script src="data/problems.js"></script>
+<script src="data/behavioral.js"></script>
+<script src="data/situational.js"></script>
+<script src="data/shop.js"></script>
+<script src="js/wallet.js"></script>
+<script src="js/goals.js"></script>
+<script src="js/profile.js"></script>
+<script src="js/runner.js"></script>
+<script src="js/coding.js"></script>
+<script src="js/behavioralUI.js"></script>
+<script src="js/situationalUI.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
